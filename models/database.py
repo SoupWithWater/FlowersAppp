@@ -27,8 +27,11 @@ def get_connection() -> Iterator[sqlite3.Connection]:
     connection.row_factory = sqlite3.Row
     try:
         yield connection
-    finally:
         connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
         connection.close()
 
 
