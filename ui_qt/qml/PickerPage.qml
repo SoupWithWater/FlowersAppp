@@ -1,3 +1,10 @@
+/* README (изменения):
+1) Исправлена синтаксическая ошибка в GridLayout (секция "Завершен"):
+   - Удалены случайно вложенные Label внутри Label (modelData.title/value).
+   - Закрывающие скобки выровнены по структуре GridLayout.
+2) Больше изменений логики не вносилось. Верстка остаётся как в присланном варианте.
+*/
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -18,44 +25,33 @@ Page {
 
     function statusText(statusCode) {
         switch (statusCode) {
-        case 1:
-            return qsTr("Оформлен")
-        case 2:
-            return qsTr("Сборка")
-        case 3:
-            return qsTr("Готов")
-        case 4:
-            return qsTr("Выдан")
-        default:
-            return qsTr("Неизвестно")
+        case 1: return qsTr("Оформлен")
+        case 2: return qsTr("Сборка")
+        case 3: return qsTr("Готов")
+        case 4: return qsTr("Выдан")
+        default: return qsTr("Неизвестно")
         }
     }
 
     function nextActionText(statusCode) {
         switch (statusCode) {
-        case 1:
-            return qsTr("Начать сборку")
-        case 2:
-            return qsTr("Заказ собран")
-        case 3:
-            return qsTr("Выдать заказ")
-        default:
-            return ""
+        case 1: return qsTr("Начать сборку")
+        case 2: return qsTr("Заказ собран")
+        case 3: return qsTr("Выдать заказ")
+        default: return ""
         }
     }
 
     function formatMoney(amount) {
-        if (amount === undefined || amount === null)
-            return ""
+        if (amount === undefined || amount === null) return ""
         const numeric = Number(amount)
-        if (isNaN(numeric))
-            return amount
-        return numeric.toLocaleString(Qt.locale("ru_RU"), "f", numeric % 1 === 0 ? 0 : 2) + " ₽"
+        if (isNaN(numeric)) return amount
+        return numeric.toLocaleString(Qt.locale("ru_RU"), "f",
+                                      numeric % 1 === 0 ? 0 : 2) + " ₽"
     }
 
     function formatDateTime(value) {
-        if (!value)
-            return "—"
+        if (!value) return "—"
         return value.toString().replace("T", " ")
     }
 
@@ -109,9 +105,7 @@ Page {
     }
 
     function ensureSelection(tabIndex) {
-        if (selectionGuard)
-            return
-
+        if (selectionGuard) return
         selectionGuard = true
 
         var order = null
@@ -139,7 +133,6 @@ Page {
 
         syncListIndexes()
         updateSelectedOrder(order)
-
         selectionGuard = false
     }
 
@@ -189,6 +182,7 @@ Page {
         anchors.margins: 16
         spacing: 24
 
+        // Левая колонка
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -391,6 +385,7 @@ Page {
             }
         }
 
+        // Правая колонка
         ScrollView {
             Layout.preferredWidth: Math.min(parent.width * 0.45, 420)
             Layout.fillHeight: true
@@ -450,7 +445,6 @@ Page {
                                     Layout.maximumWidth: detailColumn.width * 0.4
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                 }
-
                                 Label {
                                     text: selectedOrder ? statusText(selectedOrder.StatusCode) : qsTr("—")
                                     color: "#2e7d32"
@@ -467,11 +461,10 @@ Page {
                                     Layout.maximumWidth: detailColumn.width * 0.4
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                 }
-
                                 Label {
                                     text: selectedOrder && selectedOrder.PickerCode
-                                        ? qsTr("%1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
-                                        : qsTr("Не назначен")
+                                          ? qsTr("%1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
+                                          : qsTr("Не назначен")
                                     color: "#33691e"
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
@@ -486,11 +479,10 @@ Page {
                                     Layout.maximumWidth: detailColumn.width * 0.4
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                 }
-
                                 Label {
                                     text: selectedOrder
-                                        ? qsTr("%1 %2").arg(selectedOrder.CustomerName || "").arg(selectedOrder.CustomerSurname || "")
-                                        : qsTr("—")
+                                          ? qsTr("%1 %2").arg(selectedOrder.CustomerName || "").arg(selectedOrder.CustomerSurname || "")
+                                          : qsTr("—")
                                     color: "#558b2f"
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
@@ -507,7 +499,6 @@ Page {
                                     Layout.maximumWidth: detailColumn.width * 0.4
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                 }
-
                                 Label {
                                     text: selectedOrder ? selectedOrder.CustomerPhone : ""
                                     color: "#558b2f"
@@ -525,7 +516,6 @@ Page {
                                     Layout.maximumWidth: detailColumn.width * 0.4
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                 }
-
                                 Label {
                                     text: selectedOrder ? formatDateTime(selectedOrder.CreationTime) : qsTr("—")
                                     color: "#33691e"
@@ -544,7 +534,6 @@ Page {
                                     Layout.maximumWidth: detailColumn.width * 0.4
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                 }
-
                                 Label {
                                     text: selectedOrder ? formatDateTime(selectedOrder.ResolveTime) : ""
                                     color: "#33691e"
@@ -552,27 +541,8 @@ Page {
                                     Layout.fillWidth: true
                                     visible: completedTitle.visible
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                        Label {
-                                            text: modelData.title
-                                            font.bold: true
-                                            color: modelData.color
-                                            wrapMode: Text.WordWrap
-                                            Layout.maximumWidth: detailColumn.width * 0.45
-                                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                        }
-
-                                        Label {
-                                            text: modelData.value || qsTr("—")
-                                            color: modelData.color
-                                            Layout.fillWidth: true
-                                            wrapMode: Text.WordWrap
-                                            horizontalAlignment: Text.AlignRight
-                                            Layout.alignment: Qt.AlignRight | Qt.AlignTop
-                                        }
-                                    }
                                 }
                             }
-                        }
                         }
 
                         Rectangle {
