@@ -104,7 +104,9 @@ Page {
                     id: form
                     width: parent.width
                     spacing: 12
-                    padding: 12
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: 12
 
                     Label {
                         text: root.sectionTitle(root.currentSection)
