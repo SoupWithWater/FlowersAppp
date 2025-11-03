@@ -9,8 +9,8 @@ Page {
 
     property var activeOrders: []
     property var completedOrders: []
-    property int activeCurrentIndex: -1
-    property int completedCurrentIndex: -1
+    property int activeIndex: -1
+    property int completedIndex: -1
     property var selectedOrder: null
     property var receipt: ({})
     property int tabWatcher: tabs ? tabs.currentIndex : 0
@@ -228,6 +228,130 @@ Page {
         updateListSelections()
     }
 
+    Component.onCompleted: {
+        ensureSelection(tabs.currentIndex)
+        backend.requestPickerOrders()
+    }
+
+    function statusText(statusCode) {
+        switch (statusCode) {
+        case 1:
+            return qsTr("Оформлен")
+        case 2:
+            return qsTr("Сборка")
+        case 3:
+            return qsTr("Готов")
+        case 4:
+            return qsTr("Выдан")
+        default:
+            return qsTr("Неизвестно")
+        }
+    }
+
+    function nextActionText(statusCode) {
+        switch (statusCode) {
+        case 1:
+            return qsTr("Начать сборку")
+        case 2:
+            return qsTr("Заказ собран")
+        case 3:
+            return qsTr("Выдать заказ")
+        default:
+            return ""
+        }
+    }
+
+    function formatMoney(amount) {
+        if (amount === undefined || amount === null)
+            return ""
+        const numeric = Number(amount)
+        if (isNaN(numeric))
+            return amount
+        return numeric.toLocaleString(Qt.locale("ru_RU"), "f", numeric % 1 === 0 ? 0 : 2) + " ₽"
+    }
+
+    function formatDateTime(value) {
+        if (!value)
+            return "—"
+        return value.toString().replace("T", " ")
+    }
+
+    function updateSelectedOrder(order) {
+        if (order) {
+            const previousCode = selectedOrder ? selectedOrder.OrderCode : -1
+            selectedOrder = order
+            if (order.OrderCode !== previousCode) {
+                receipt = ({})
+            }
+            backend.requestReceipt(order.OrderCode)
+        } else {
+            selectedOrder = null
+            receipt = ({})
+        }
+    }
+
+    function syncListIndexes() {
+        activeList.suppress = true
+        activeList.currentIndex = activeIndex
+        activeList.suppress = false
+
+        completedList.suppress = true
+        completedList.currentIndex = completedIndex
+        completedList.suppress = false
+    }
+
+    function ensureSelection(tabIndex) {
+        if (tabIndex === 0) {
+            if (activeOrders.length) {
+                var idx = activeIndex >= 0 && activeIndex < activeOrders.length ? activeIndex : 0
+                activeIndex = idx
+                completedIndex = -1
+                updateSelectedOrder(activeOrders[idx])
+            } else {
+                activeIndex = -1
+                updateSelectedOrder(null)
+            }
+        } else {
+            if (completedOrders.length) {
+                var idxCompleted = completedIndex >= 0 && completedIndex < completedOrders.length ? completedIndex : 0
+                completedIndex = idxCompleted
+                activeIndex = -1
+                updateSelectedOrder(completedOrders[idxCompleted])
+            } else {
+                completedIndex = -1
+                updateSelectedOrder(null)
+            }
+        }
+        syncListIndexes()
+    }
+
+    function applySelection(section, index) {
+        if (section === "active") {
+            if (index >= 0 && index < activeOrders.length) {
+                activeIndex = index
+                completedIndex = -1
+                updateSelectedOrder(activeOrders[index])
+            } else {
+                activeIndex = -1
+                if (tabs.currentIndex === 0) {
+                    updateSelectedOrder(null)
+                }
+            }
+        } else {
+            if (index >= 0 && index < completedOrders.length) {
+                completedIndex = index
+                activeIndex = -1
+                updateSelectedOrder(completedOrders[index])
+            } else {
+                completedIndex = -1
+                if (tabs.currentIndex === 1) {
+                    updateSelectedOrder(null)
+                }
+            }
+        }
+        syncListIndexes()
+    }
+
     header: ToolBar {
         background: Rectangle { color: "white" }
 
@@ -278,14 +402,10 @@ Page {
                 id: tabs
                 Layout.fillWidth: true
                 currentIndex: 0
+                onCurrentIndexChanged: ensureSelection(currentIndex)
 
-                TabButton {
-                    text: qsTr("Активные")
-                }
-
-                TabButton {
-                    text: qsTr("Завершенные")
-                }
+                TabButton { text: qsTr("Активные") }
+                TabButton { text: qsTr("Завершенные") }
             }
 
             Rectangle {
@@ -311,197 +431,160 @@ Page {
                 Layout.fillWidth: true
                 currentIndex: 0
 
-                TabButton {
-                    text: qsTr("Активные")
-                }
-
-                TabButton {
-                    text: qsTr("Завершенные")
-                }
-
-                onCurrentIndexChanged: ensureSelectionForTab(currentIndex)
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                radius: 24
-                color: "#f1f8e9"
-                border.color: "#c8e6c9"
-                border.width: 1
-
-                StackLayout {
-                    id: listStack
+                ListView {
+                    id: activeList
                     anchors.fill: parent
                     anchors.margins: 8
-                    currentIndex: tabs.currentIndex
-
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-
-                        ListView {
-                            id: activeList
-                            anchors.fill: parent
-                            property bool internalChange: false
-                            model: root.activeOrders
-                            clip: true
-                            spacing: 12
-                            currentIndex: root.activeCurrentIndex
-                            focus: true
-                            highlight: Rectangle {
-                                radius: 20
-                                color: "#c8e6c9"
-                                border.color: "#2e7d32"
-                                border.width: 2
-                            }
-                            highlightMoveDuration: 150
-                            onCurrentIndexChanged: {
-                                if (!internalChange) {
-                                    root.selectFromList("active", currentIndex)
-                                }
-                            }
-
-                            delegate: Rectangle {
-                                required property int index
-                                width: ListView.view.width
-                                height: 120
-                                radius: 20
-                                color: ListView.isCurrentItem ? "#e0f2f1" : "white"
-                                border.color: "#a5d6a7"
-                                border.width: 1
-                                opacity: modelData ? 1 : 0
-
-                                ColumnLayout {
-                                    anchors.fill: parent
-                                    anchors.margins: 16
-                                    spacing: 6
-
-                                    Label {
-                                        text: qsTr("Заказ #%1").arg(modelData.OrderCode)
-                                        font.pixelSize: 18
-                                        font.bold: true
-                                        color: "#2e7d32"
-                                    }
-
-                                    Label {
-                                        text: qsTr("Клиент: %1 %2").arg(modelData.CustomerName).arg(modelData.CustomerSurname)
-                                        color: "#33691e"
-                                    }
-
-                                    Label {
-                                        text: qsTr("Статус: %1").arg(root.statusText(modelData.StatusCode))
-                                        color: "#558b2f"
-                                    }
-
-                                    Label {
-                                        text: qsTr("Сумма: %1").arg(root.formatMoney(modelData.TotalPrice))
-                                        color: "#1b5e20"
-                                    }
-
-                                    Label {
-                                        visible: !!modelData.PickerCode
-                                        text: qsTr("Сборщик: %1 %2").arg(modelData.PickerName || "").arg(modelData.PickerSurname || "")
-                                        color: "#2e7d32"
-                                    }
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: root.selectFromList("active", index)
-                                }
-                            }
-                        }
-
-                        Label {
-                            visible: !root.activeOrders.length
-                            anchors.centerIn: parent
-                            text: qsTr("Нет активных заказов")
-                            color: "#78909c"
+                    property bool suppress: false
+                    model: root.activeOrders
+                    clip: true
+                    spacing: 12
+                    visible: tabs.currentIndex === 0
+                    enabled: visible
+                    currentIndex: root.activeIndex
+                    highlight: Rectangle {
+                        radius: 20
+                        color: "#c8e6c9"
+                        border.color: "#2e7d32"
+                        border.width: 2
+                    }
+                    highlightMoveDuration: 150
+                    onCurrentIndexChanged: {
+                        if (!suppress) {
+                            applySelection("active", currentIndex)
                         }
                     }
 
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                    delegate: Rectangle {
+                        required property int index
+                        width: ListView.view.width
+                        height: 120
+                        radius: 20
+                        color: ListView.isCurrentItem ? "#e0f2f1" : "white"
+                        border.color: "#a5d6a7"
+                        border.width: 1
 
-                        ListView {
-                            id: completedList
+                        ColumnLayout {
                             anchors.fill: parent
-                            property bool internalChange: false
-                            model: root.completedOrders
-                            clip: true
-                            spacing: 12
-                            currentIndex: root.completedCurrentIndex
-                            highlight: Rectangle {
-                                radius: 20
-                                color: "#ffe0b2"
-                                border.color: "#fb8c00"
-                                border.width: 2
-                            }
-                            highlightMoveDuration: 150
-                            onCurrentIndexChanged: {
-                                if (!internalChange) {
-                                    root.selectFromList("completed", currentIndex)
-                                }
+                            anchors.margins: 16
+                            spacing: 6
+
+                            Label {
+                                text: qsTr("Заказ #%1").arg(modelData.OrderCode)
+                                font.pixelSize: 18
+                                font.bold: true
+                                color: "#2e7d32"
                             }
 
-                            delegate: Rectangle {
-                                required property int index
-                                width: ListView.view.width
-                                height: 120
-                                radius: 20
-                                color: ListView.isCurrentItem ? "#fff3e0" : "white"
-                                border.color: "#ffe0b2"
-                                border.width: 1
+                            Label {
+                                text: qsTr("Клиент: %1 %2").arg(modelData.CustomerName).arg(modelData.CustomerSurname)
+                                color: "#33691e"
+                            }
 
-                                ColumnLayout {
-                                    anchors.fill: parent
-                                    anchors.margins: 16
-                                    spacing: 6
+                            Label {
+                                text: qsTr("Статус: %1").arg(statusText(modelData.StatusCode))
+                                color: "#558b2f"
+                            }
 
-                                    Label {
-                                        text: qsTr("Заказ #%1").arg(modelData.OrderCode)
-                                        font.pixelSize: 18
-                                        font.bold: true
-                                        color: "#ef6c00"
-                                    }
+                            Label {
+                                text: qsTr("Сумма: %1").arg(formatMoney(modelData.TotalPrice))
+                                color: "#1b5e20"
+                            }
 
-                                    Label {
-                                        text: qsTr("Клиент: %1 %2").arg(modelData.CustomerName).arg(modelData.CustomerSurname)
-                                        color: "#e65100"
-                                    }
-
-                                    Label {
-                                        text: qsTr("Выдан: %1").arg(root.formatDateTime(modelData.ResolveTime))
-                                        color: "#8d6e63"
-                                    }
-
-                                    Label {
-                                        text: qsTr("Сумма: %1").arg(root.formatMoney(modelData.TotalPrice))
-                                        color: "#4e342e"
-                                    }
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: root.selectFromList("completed", index)
-                                }
+                            Label {
+                                visible: !!modelData.PickerCode
+                                text: qsTr("Сборщик: %1 %2").arg(modelData.PickerName || "").arg(modelData.PickerSurname || "")
+                                color: "#2e7d32"
                             }
                         }
 
-                        Label {
-                            visible: !root.completedOrders.length
-                            anchors.centerIn: parent
-                            text: qsTr("Завершенных заказов пока нет")
-                            color: "#78909c"
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: applySelection("active", index)
                         }
                     }
                 }
 
-                TapHandler {
-                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchScreen
-                    onTapped: orderList.currentIndex = index
+                ListView {
+                    id: completedList
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    property bool suppress: false
+                    model: root.completedOrders
+                    clip: true
+                    spacing: 12
+                    visible: tabs.currentIndex === 1
+                    enabled: visible
+                    currentIndex: root.completedIndex
+                    highlight: Rectangle {
+                        radius: 20
+                        color: "#ffe0b2"
+                        border.color: "#fb8c00"
+                        border.width: 2
+                    }
+                    highlightMoveDuration: 150
+                    onCurrentIndexChanged: {
+                        if (!suppress) {
+                            applySelection("completed", currentIndex)
+                        }
+                    }
+
+                    delegate: Rectangle {
+                        required property int index
+                        width: ListView.view.width
+                        height: 120
+                        radius: 20
+                        color: ListView.isCurrentItem ? "#fff3e0" : "white"
+                        border.color: "#ffe0b2"
+                        border.width: 1
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 16
+                            spacing: 6
+
+                            Label {
+                                text: qsTr("Заказ #%1").arg(modelData.OrderCode)
+                                font.pixelSize: 18
+                                font.bold: true
+                                color: "#ef6c00"
+                            }
+
+                            Label {
+                                text: qsTr("Клиент: %1 %2").arg(modelData.CustomerName).arg(modelData.CustomerSurname)
+                                color: "#e65100"
+                            }
+
+                            Label {
+                                text: qsTr("Выдан: %1").arg(formatDateTime(modelData.ResolveTime))
+                                color: "#8d6e63"
+                            }
+
+                            Label {
+                                text: qsTr("Сумма: %1").arg(formatMoney(modelData.TotalPrice))
+                                color: "#4e342e"
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: applySelection("completed", index)
+                        }
+                    }
+                }
+
+                Label {
+                    anchors.centerIn: parent
+                    visible: tabs.currentIndex === 0 && !root.activeOrders.length
+                    text: qsTr("Нет активных заказов")
+                    color: "#78909c"
+                }
+
+                Label {
+                    anchors.centerIn: parent
+                    visible: tabs.currentIndex === 1 && !root.completedOrders.length
+                    text: qsTr("Завершенных заказов пока нет")
+                    color: "#78909c"
                 }
             }
         }
@@ -548,7 +631,7 @@ Page {
                                 spacing: 4
 
                                 Label {
-                                    text: qsTr("Статус: %1").arg(root.statusText(selectedOrder.StatusCode))
+                                    text: qsTr("Статус: %1").arg(statusText(selectedOrder.StatusCode))
                                     font.pixelSize: 18
                                     font.bold: true
                                     color: "#2e7d32"
@@ -582,13 +665,13 @@ Page {
                             spacing: 6
 
                             Label {
-                                text: qsTr("Создан: %1").arg(root.formatDateTime(selectedOrder.CreationTime))
+                                text: qsTr("Создан: %1").arg(formatDateTime(selectedOrder.CreationTime))
                                 color: "#607d8b"
                             }
 
                             Label {
                                 text: selectedOrder && selectedOrder.ResolveTime
-                                      ? qsTr("Выдан: %1").arg(root.formatDateTime(selectedOrder.ResolveTime))
+                                      ? qsTr("Выдан: %1").arg(formatDateTime(selectedOrder.ResolveTime))
                                       : qsTr("Выдан: —")
                                 color: "#607d8b"
                             }
@@ -622,13 +705,13 @@ Page {
                                     }
 
                                     Label {
-                                        text: qsTr("%1 × %2").arg(modelData.Count).arg(root.formatMoney(modelData.Price))
+                                        text: qsTr("%1 × %2").arg(modelData.Count).arg(formatMoney(modelData.Price))
                                         color: "#33691e"
                                         font.family: "monospace"
                                     }
 
                                     Label {
-                                        text: root.formatMoney(modelData.Count * modelData.Price)
+                                        text: formatMoney(modelData.Count * modelData.Price)
                                         color: "#1b5e20"
                                         font.bold: true
                                         font.family: "monospace"
@@ -651,7 +734,7 @@ Page {
                                 }
 
                                 Label {
-                                    text: receipt.order ? root.formatMoney(receipt.order.TotalPrice) : root.formatMoney(selectedOrder.TotalPrice)
+                                    text: receipt.order ? formatMoney(receipt.order.TotalPrice) : formatMoney(selectedOrder.TotalPrice)
                                     font.pixelSize: 18
                                     font.bold: true
                                     color: "#1b5e20"
@@ -666,7 +749,7 @@ Page {
 
                             Button {
                                 visible: selectedOrder && selectedOrder.StatusCode < 4
-                                text: selectedOrder ? root.nextActionText(selectedOrder.StatusCode) : ""
+                                text: selectedOrder ? nextActionText(selectedOrder.StatusCode) : ""
                                 Layout.fillWidth: true
                                 enabled: selectedOrder && selectedOrder.StatusCode < 4
                                 implicitHeight: 44
@@ -710,62 +793,79 @@ Page {
         target: backend
 
         function onPickerOrdersChanged(items) {
-            const previousOrder = root.selectedOrder
+            const previousOrder = selectedOrder
             const previousCode = previousOrder ? previousOrder.OrderCode : -1
 
             const actives = items.filter(function(entry) { return entry.StatusCode < 4 })
             const completed = items.filter(function(entry) { return entry.StatusCode >= 4 })
 
-            root.activeOrders = actives
-            root.completedOrders = completed
+            activeOrders = actives
+            completedOrders = completed
 
             var newSelection = null
+            var nextTab = tabs.currentIndex
+
             if (previousCode !== -1) {
-                newSelection = actives.find(function(entry) { return entry.OrderCode === previousCode })
-                if (!newSelection) {
-                    newSelection = completed.find(function(entry) { return entry.OrderCode === previousCode })
+                const activeIdx = actives.findIndex(function(entry) { return entry.OrderCode === previousCode })
+                if (activeIdx !== -1) {
+                    activeIndex = activeIdx
+                    completedIndex = -1
+                    newSelection = actives[activeIdx]
+                    nextTab = 0
+                } else {
+                    const completedIdx = completed.findIndex(function(entry) { return entry.OrderCode === previousCode })
+                    if (completedIdx !== -1) {
+                        completedIndex = completedIdx
+                        activeIndex = -1
+                        newSelection = completed[completedIdx]
+                        nextTab = 1
+                    }
                 }
             }
 
-            var newActiveIndex = -1
-            var newCompletedIndex = -1
-
-            if (newSelection) {
-                newActiveIndex = actives.findIndex(function(entry) { return entry.OrderCode === newSelection.OrderCode })
-                newCompletedIndex = completed.findIndex(function(entry) { return entry.OrderCode === newSelection.OrderCode })
-            } else {
-                if (tabs.currentIndex === 0 && actives.length) {
+            if (!newSelection) {
+                if (nextTab === 0 && actives.length) {
+                    activeIndex = 0
+                    completedIndex = -1
                     newSelection = actives[0]
-                    newActiveIndex = 0
-                } else if (tabs.currentIndex === 1 && completed.length) {
+                } else if (nextTab === 1 && completed.length) {
+                    completedIndex = 0
+                    activeIndex = -1
                     newSelection = completed[0]
-                    newCompletedIndex = 0
                 } else if (actives.length) {
-                    tabs.currentIndex = 0
+                    activeIndex = 0
+                    completedIndex = -1
                     newSelection = actives[0]
-                    newActiveIndex = 0
+                    nextTab = 0
                 } else if (completed.length) {
-                    tabs.currentIndex = 1
+                    completedIndex = 0
+                    activeIndex = -1
                     newSelection = completed[0]
-                    newCompletedIndex = 0
+                    nextTab = 1
+                } else {
+                    activeIndex = -1
+                    completedIndex = -1
+                    newSelection = null
+                    nextTab = 0
                 }
             }
 
-            root.activeCurrentIndex = newActiveIndex
-            root.completedCurrentIndex = newCompletedIndex
-            root.updateListSelections()
-            root.updateSelectedOrder(newSelection)
+            if (tabs.currentIndex !== nextTab) {
+                tabs.currentIndex = nextTab
+            }
+
+            syncListIndexes()
+            updateSelectedOrder(newSelection)
         }
 
         function onReceiptReady(data) {
-            root.receipt = data
-            if (root.selectedOrder && data && data.order && data.order.OrderCode === root.selectedOrder.OrderCode) {
-                root.selectedOrder.StatusCode = data.order.StatusCode
-                root.selectedOrder.StatusName = data.order.StatusName
-                root.selectedOrder.ResolveTime = data.order.ResolveTime
+            receipt = data
+            if (selectedOrder && data && data.order && data.order.OrderCode === selectedOrder.OrderCode) {
+                selectedOrder.StatusCode = data.order.StatusCode
+                selectedOrder.StatusName = data.order.StatusName
+                selectedOrder.ResolveTime = data.order.ResolveTime
             }
         }
     }
-
 }
 
