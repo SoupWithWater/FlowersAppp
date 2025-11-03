@@ -1,6 +1,17 @@
 from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
+
+if __package__ in {None, ""}:
+    # ``database_init`` is usually executed via ``python -m`` so that
+    # package-relative imports work.  When the script is launched directly
+    # (for example, by pressing "Run" in an IDE) ``__package__`` is empty and
+    # the relative imports below fail, leaving the database untouched.  Adjust
+    # the import path to behave the same way as module execution.
+    sys.path.append(str(Path(__file__).resolve().parent.parent))
+    __package__ = "models"
 
 from . import seed_data
 from .database import execute, executemany, get_connection
