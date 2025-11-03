@@ -436,67 +436,122 @@ Page {
                                 color: "#2e7d32"
                             }
 
-                            ColumnLayout {
+                            GridLayout {
                                 Layout.fillWidth: true
-                                spacing: 8
+                                columns: 2
+                                columnSpacing: 12
+                                rowSpacing: 10
 
-                                function infoRow(title, value, color, visible) {
-                                    return {
-                                        title: title,
-                                        value: value,
-                                        color: color,
-                                        visible: visible === undefined ? true : visible
-                                    }
+                                Label {
+                                    text: qsTr("Статус")
+                                    font.bold: true
+                                    color: "#2e7d32"
+                                    wrapMode: Text.WordWrap
+                                    Layout.maximumWidth: detailColumn.width * 0.4
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                 }
 
-                                readonly property var rows: [
-                                    infoRow(
-                                        qsTr("Статус"),
-                                        selectedOrder ? statusText(selectedOrder.StatusCode) : "",
-                                        "#2e7d32"
-                                    ),
-                                    infoRow(
-                                        qsTr("Сборщик"),
-                                        selectedOrder && selectedOrder.PickerCode
-                                            ? qsTr("%1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
-                                            : qsTr("Не назначен"),
-                                        "#33691e"
-                                    ),
-                                    infoRow(
-                                        qsTr("Клиент"),
-                                        selectedOrder
-                                            ? qsTr("%1 %2").arg(selectedOrder.CustomerName || "").arg(selectedOrder.CustomerSurname || "")
-                                            : "",
-                                        "#558b2f"
-                                    ),
-                                    infoRow(
-                                        qsTr("Телефон"),
-                                        selectedOrder ? selectedOrder.CustomerPhone : "",
-                                        "#558b2f",
-                                        selectedOrder && !!selectedOrder.CustomerPhone
-                                    ),
-                                    infoRow(
-                                        qsTr("Создан"),
-                                        selectedOrder ? formatDateTime(selectedOrder.CreationTime) : "",
-                                        "#33691e"
-                                    ),
-                                    infoRow(
-                                        qsTr("Завершен"),
-                                        selectedOrder ? formatDateTime(selectedOrder.ResolveTime) : "",
-                                        "#33691e",
-                                        selectedOrder && !!selectedOrder.ResolveTime
-                                    )
-                                ]
+                                Label {
+                                    text: selectedOrder ? statusText(selectedOrder.StatusCode) : qsTr("—")
+                                    color: "#2e7d32"
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
 
-                                Repeater {
-                                    model: parent.rows
+                                Label {
+                                    text: qsTr("Сборщик")
+                                    font.bold: true
+                                    color: "#33691e"
+                                    wrapMode: Text.WordWrap
+                                    Layout.maximumWidth: detailColumn.width * 0.4
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
 
-                                    delegate: RowLayout {
-                                        required property var modelData
-                                        visible: modelData.visible
-                                        spacing: 8
-                                        Layout.fillWidth: true
+                                Label {
+                                    text: selectedOrder && selectedOrder.PickerCode
+                                        ? qsTr("%1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
+                                        : qsTr("Не назначен")
+                                    color: "#33691e"
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
 
+                                Label {
+                                    text: qsTr("Клиент")
+                                    font.bold: true
+                                    color: "#558b2f"
+                                    wrapMode: Text.WordWrap
+                                    Layout.maximumWidth: detailColumn.width * 0.4
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
+
+                                Label {
+                                    text: selectedOrder
+                                        ? qsTr("%1 %2").arg(selectedOrder.CustomerName || "").arg(selectedOrder.CustomerSurname || "")
+                                        : qsTr("—")
+                                    color: "#558b2f"
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
+
+                                Label {
+                                    id: phoneTitle
+                                    text: qsTr("Телефон")
+                                    font.bold: true
+                                    color: "#558b2f"
+                                    wrapMode: Text.WordWrap
+                                    visible: selectedOrder && !!selectedOrder.CustomerPhone
+                                    Layout.maximumWidth: detailColumn.width * 0.4
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
+
+                                Label {
+                                    text: selectedOrder ? selectedOrder.CustomerPhone : ""
+                                    color: "#558b2f"
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    visible: phoneTitle.visible
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
+
+                                Label {
+                                    text: qsTr("Создан")
+                                    font.bold: true
+                                    color: "#33691e"
+                                    wrapMode: Text.WordWrap
+                                    Layout.maximumWidth: detailColumn.width * 0.4
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
+
+                                Label {
+                                    text: selectedOrder ? formatDateTime(selectedOrder.CreationTime) : qsTr("—")
+                                    color: "#33691e"
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
+
+                                Label {
+                                    id: completedTitle
+                                    text: qsTr("Завершен")
+                                    font.bold: true
+                                    color: "#33691e"
+                                    wrapMode: Text.WordWrap
+                                    visible: selectedOrder && !!selectedOrder.ResolveTime
+                                    Layout.maximumWidth: detailColumn.width * 0.4
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                }
+
+                                Label {
+                                    text: selectedOrder ? formatDateTime(selectedOrder.ResolveTime) : ""
+                                    color: "#33691e"
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    visible: completedTitle.visible
+                                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                         Label {
                                             text: modelData.title
                                             font.bold: true
@@ -517,6 +572,7 @@ Page {
                                     }
                                 }
                             }
+                        }
                         }
 
                         Rectangle {
