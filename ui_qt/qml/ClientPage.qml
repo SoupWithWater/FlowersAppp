@@ -10,6 +10,7 @@ Page {
     property var cartItems: []
     property int cartCount: 0
     property real cartTotal: 0
+    property string orderMessage: ""
 
     header: ToolBar {
         background: Rectangle { color: "white" }
@@ -188,7 +189,7 @@ Page {
                     }
                 }
                 footer: Label {
-                    visible: root.cartItems.length === 0
+                    visible: root.cartItems.length === 0 && root.orderMessage.length === 0
                     text: qsTr("Корзина пуста")
                     color: "#2e7d32"
                     horizontalAlignment: Text.AlignHCenter
@@ -204,6 +205,17 @@ Page {
                 Layout.alignment: Qt.AlignHCenter
             }
 
+            Label {
+                text: root.orderMessage
+                visible: text.length > 0
+                font.pixelSize: 20
+                font.bold: true
+                color: "#2e7d32"
+                horizontalAlignment: Text.AlignHCenter
+                Layout.alignment: Qt.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
             Button {
                 text: qsTr("Оформить заказ")
                 Layout.fillWidth: true
@@ -216,11 +228,15 @@ Page {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: {
-                    backend.placeOrder()
-                    cartPopup.close()
-                }
+                onClicked: backend.placeOrder()
             }
+        }
+    }
+
+    Connections {
+        target: cartPopup
+        function onClosed() {
+            root.orderMessage = ""
         }
     }
 
@@ -233,6 +249,14 @@ Page {
             root.cartItems = items
             root.cartCount = items.reduce(function(acc, item) { return acc + item.Count }, 0)
             root.cartTotal = total
+            if (items.length > 0)
+                root.orderMessage = ""
+        }
+        function onOrderPlaced(totalPrice) {
+            var formatted = Number(totalPrice || 0).toLocaleString(Qt.locale(), 'f', 0)
+            root.orderMessage = qsTr("Спасибо за заказ на сумму %1 ₽!").arg(formatted)
+            if (!cartPopup.opened)
+                cartPopup.open()
         }
     }
 
