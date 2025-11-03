@@ -133,7 +133,6 @@ def create_schema() -> None:
 
 
 def seed() -> None:
-    create_schema()
     executemany("INSERT OR IGNORE INTO Statuses(StatusCode, StatusName) VALUES(?, ?)", STATUS_VALUES)
     executemany("INSERT OR IGNORE INTO Positions(PositionCode, PositionName) VALUES(?, ?)", POSITION_VALUES)
 
@@ -146,7 +145,19 @@ def seed() -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Initialise flowers database")
     parser.add_argument("--reset", action="store_true", help="Drop all tables before creating schema")
-    parser.add_argument("--seed", action="store_true", help="Insert demo data")
+    parser.add_argument(
+        "--seed",
+        dest="seed",
+        action="store_true",
+        help="Insert demo data (enabled by default)",
+    )
+    parser.add_argument(
+        "--no-seed",
+        dest="seed",
+        action="store_false",
+        help="Skip inserting demo data",
+    )
+    parser.set_defaults(seed=True)
     args = parser.parse_args()
 
     if args.reset:
