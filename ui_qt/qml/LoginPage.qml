@@ -46,6 +46,16 @@ Page {
                     id: loginField
                     placeholderText: qsTr("Логин")
                     Layout.fillWidth: true
+                    implicitHeight: 48
+                    font.pixelSize: 18
+                    placeholderTextColor: "#5f6d5f"
+                    color: "#1b5e20"
+                    background: Rectangle {
+                        radius: 12
+                        border.color: "#81c784"
+                        border.width: 1.5
+                        color: "#f3fbf5"
+                    }
                 }
 
                 TextField {
@@ -53,6 +63,16 @@ Page {
                     placeholderText: qsTr("Пароль")
                     echoMode: TextInput.Password
                     Layout.fillWidth: true
+                    implicitHeight: 48
+                    font.pixelSize: 18
+                    placeholderTextColor: "#5f6d5f"
+                    color: "#1b5e20"
+                    background: Rectangle {
+                        radius: 12
+                        border.color: "#81c784"
+                        border.width: 1.5
+                        color: "#f3fbf5"
+                    }
                 }
 
                 Button {
