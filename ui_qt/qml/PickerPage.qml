@@ -20,10 +20,12 @@ Page {
                 text: qsTr("Выйти")
                 background: Rectangle { color: "#a5d6a7"; radius: 20 }
                 contentItem: Label {
-                    text: control.text
+                    text: (parent as Button).text
                     color: "#2e7d32"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: 16
+                    font.bold: true
                 }
                 Layout.preferredWidth: implicitWidth
                 Layout.alignment: Qt.AlignVCenter
@@ -55,12 +57,29 @@ Page {
             model: root.orders
             clip: true
             spacing: 12
+            currentIndex: -1
+            highlight: Rectangle {
+                radius: 20
+                color: "#b9e4bf"
+                border.color: "#2e7d32"
+                border.width: 1
+            }
+            highlightFollowsCurrentItem: true
+            onCurrentIndexChanged: {
+                if (currentIndex >= 0 && currentIndex < root.orders.length) {
+                    const order = root.orders[currentIndex]
+                    backend.requestReceipt(order.OrderCode)
+                } else {
+                    root.receipt = ({})
+                }
+            }
 
             delegate: Rectangle {
+                required property int index
                 width: parent.width
-                height: 150
+                height: 160
                 radius: 20
-                color: "#d0f2d6"
+                color: orderList.currentIndex === index ? "transparent" : "#d0f2d6"
                 border.color: "#2e7d32"
                 border.width: 1
 
@@ -73,6 +92,11 @@ Page {
                     Label { text: qsTr("Клиент: %1 %2").arg(modelData.CustomerName).arg(modelData.CustomerSurname); color: "#2e7d32" }
                     Label { text: qsTr("Статус: %1").arg(modelData.StatusName); color: "#33691e" }
                     Label { text: qsTr("Сумма: %1 ₽").arg(modelData.TotalPrice); color: "#1b5e20" }
+                    Label {
+                        visible: !!modelData.PickerCode
+                        text: qsTr("Сборщик: %1 %2").arg(modelData.PickerName || "").arg(modelData.PickerSurname || "")
+                        color: "#2e7d32"
+                    }
 
                     Item { Layout.fillHeight: true }
 
@@ -83,13 +107,20 @@ Page {
                         implicitHeight: 40
                         background: Rectangle { color: "#2e7d32"; radius: 18 }
                         contentItem: Label {
-                            text: control.text
+                            text: (parent as Button).text
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
+                            font.pixelSize: 16
+                            font.bold: true
                         }
                         onClicked: backend.advanceOrderStatus(modelData.OrderCode)
                     }
+                }
+
+                TapHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchScreen
+                    onTapped: orderList.currentIndex = index
                 }
             }
         }
@@ -128,6 +159,7 @@ Page {
 
                         Label { text: qsTr("Магазин цветов 'Флора'"); color: "#1b5e20"; font.bold: true }
                         Label { text: receipt.order ? qsTr("Заказ #%1").arg(receipt.order.OrderCode) : ""; color: "#2e7d32" }
+                        Label { text: receipt.order ? qsTr("Статус: %1").arg(receipt.order.StatusName) : ""; color: "#2e7d32" }
                         Label { text: receipt.order ? qsTr("Создан: %1").arg(receipt.order.CreationTime) : ""; color: "#33691e" }
                         Label { text: receipt.order && receipt.order.ResolveTime ? qsTr("Выдан: %1").arg(receipt.order.ResolveTime) : ""; color: "#33691e" }
 
@@ -151,10 +183,12 @@ Page {
                             enabled: receipt.order && receipt.order.ResolveTime
                             background: Rectangle { color: "#2e7d32"; radius: 18 }
                             contentItem: Label {
-                                text: control.text
+                                text: (parent as Button).text
                                 color: "white"
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
+                                font.pixelSize: 16
+                                font.bold: true
                             }
                             onClicked: backend.notification("Чек отправлен на печать")
                         }
@@ -167,7 +201,27 @@ Page {
     Connections {
         target: backend
         function onPickerOrdersChanged(items) {
+            const oldIndex = orderList.currentIndex
+            const previousOrder = oldIndex >= 0 && oldIndex < root.orders.length
+                    ? root.orders[orderList.currentIndex]
+                    : null
             root.orders = items
+            if (!items.length) {
+                orderList.currentIndex = -1
+                root.receipt = ({})
+                return
+            }
+            var newIndex = -1
+            if (previousOrder) {
+                newIndex = items.findIndex(function(entry) { return entry.OrderCode === previousOrder.OrderCode })
+            }
+            if (newIndex < 0) {
+                newIndex = 0
+            }
+            orderList.currentIndex = newIndex
+            if (newIndex === oldIndex && newIndex >= 0 && newIndex < root.orders.length) {
+                backend.requestReceipt(root.orders[newIndex].OrderCode)
+            }
         }
         function onReceiptReady(data) {
             root.receipt = data
