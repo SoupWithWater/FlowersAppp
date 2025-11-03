@@ -7,7 +7,11 @@ from pathlib import Path
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
-from .backend import Backend
+if __package__ in {None, ""}:
+    sys.path.append(str(Path(__file__).resolve().parent))
+    from backend import Backend
+else:
+    from .backend import Backend
 
 
 def main() -> int:
