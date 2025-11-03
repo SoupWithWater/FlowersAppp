@@ -61,82 +61,83 @@ Page {
                 TabButton {
                     text: qsTr("Заказы")
                     contentItem: Label {
-                        text: control.text
-                        color: control.checked ? "white" : "#2e7d32"
+                        text: parent.text
+                        color: (parent as TabButton).checked ? "white": "#2e7d32"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 16
-                        font.bold: control.checked
+                        font.bold: (parent as TabButton).checked
                     }
-                    background: Rectangle {
-                        implicitHeight: 40
-                        radius: 18
-                        color: control.checked ? "#2e7d32" : "#c8e6c9"
-                    }
+                        background: Rectangle{
+                            implicitHeight: 40
+                            radius: 18
+                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                        }
                 }
+
                 TabButton {
                     text: qsTr("Клиенты")
                     contentItem: Label {
-                        text: control.text
-                        color: control.checked ? "white" : "#2e7d32"
+                        text: parent.text
+                        color: (parent as TabButton).checked ? "white": "#2e7d32"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 16
-                        font.bold: control.checked
+                        font.bold: (parent as TabButton).checked
                     }
-                    background: Rectangle {
-                        implicitHeight: 40
-                        radius: 18
-                        color: control.checked ? "#2e7d32" : "#c8e6c9"
-                    }
+                        background: Rectangle{
+                            implicitHeight: 40
+                            radius: 18
+                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                        }
                 }
                 TabButton {
                     text: qsTr("Сотрудники")
                     contentItem: Label {
-                        text: control.text
-                        color: control.checked ? "white" : "#2e7d32"
+                        text: parent.text
+                        color: (parent as TabButton).checked ? "white": "#2e7d32"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 16
-                        font.bold: control.checked
+                        font.bold: (parent as TabButton).checked
                     }
-                    background: Rectangle {
-                        implicitHeight: 40
-                        radius: 18
-                        color: control.checked ? "#2e7d32" : "#c8e6c9"
-                    }
+                        background: Rectangle{
+                            implicitHeight: 40
+                            radius: 18
+                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                        }
                 }
                 TabButton {
                     text: qsTr("Букеты")
                     contentItem: Label {
-                        text: control.text
-                        color: control.checked ? "white" : "#2e7d32"
+                        text: parent.text
+                        color: (parent as TabButton).checked ? "white": "#2e7d32"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 16
-                        font.bold: control.checked
+                        font.bold: (parent as TabButton).checked
                     }
-                    background: Rectangle {
-                        implicitHeight: 40
-                        radius: 18
-                        color: control.checked ? "#2e7d32" : "#c8e6c9"
-                    }
+                        background: Rectangle{
+                            implicitHeight: 40
+                            radius: 18
+                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                        }
                 }
                 TabButton {
-                    text: qsTr("Цветы")
+                    text: qsTr("Цеветы")
                     contentItem: Label {
-                        text: control.text
-                        color: control.checked ? "white" : "#2e7d32"
+                        text: parent.text
+                        color: (parent as TabButton).checked ? "white": "#2e7d32"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 16
-                        font.bold: control.checked
+                        font.bold: (parent as TabButton).checked
                     }
-                    background: Rectangle {
-                        implicitHeight: 40
-                        radius: 18
-                        color: control.checked ? "#2e7d32" : "#c8e6c9"
-                    }
+                        background: Rectangle{
+                            implicitHeight: 40
+                            radius: 18
+                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                        }
                 }
             }
 

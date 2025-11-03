@@ -9,7 +9,7 @@ ApplicationWindow {
     height: 800
     visible: true
     color: "#E9F7EF"
-    title: qsTr("Цветочный магазин")
+    title: qsTr("Цветочный")
 
     property string currentRole: ""
 
