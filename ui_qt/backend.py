@@ -222,26 +222,55 @@ class Backend(QObject):
     # ------------------------------------------------------------------
     # Picker UI
     # ------------------------------------------------------------------
+    def _current_picker_id(self) -> int | None:
+        if not self._user or self._user.role != ROLE_PICKER:
+            return None
+        try:
+            return int(self._user.identifier)
+        except (TypeError, ValueError):
+            return None
+
     @Slot()
     def requestPickerOrders(self) -> None:
+        picker_id = self._current_picker_id()
+        picker_filter = ""
+        params: dict[str, Any] | None = None
+        if picker_id is not None:
+            picker_filter = "AND (o.PickerCode IS NULL OR o.PickerCode = :picker)"
+            params = {"picker": picker_id}
         sql = (
             """
             SELECT o.OrderCode, o.StatusCode, s.StatusName, o.CreationTime, o.ResolveTime, o.TotalPrice,
-                   c.Name AS CustomerName, c.Surname AS CustomerSurname
+                   c.Name AS CustomerName, c.Surname AS CustomerSurname,
+                   o.PickerCode,
+                   e.Name AS PickerName, e.Surname AS PickerSurname
             FROM Orders o
             JOIN Statuses s ON s.StatusCode = o.StatusCode
             JOIN Customers c ON c.PhoneNumber = o.PhoneNumber
+            LEFT JOIN Employees e ON e.EmployeeCode = o.PickerCode
             WHERE o.StatusCode IN (1, 2, 3)
+              {picker_filter}
             ORDER BY o.CreationTime ASC
             """
-        )
-        rows = fetch_all(sql)
+        ).format(picker_filter=picker_filter)
+        rows = fetch_all(sql, params)
         self.pickerOrdersChanged.emit([dict(row) for row in rows])
 
     @Slot(int)
     def advanceOrderStatus(self, order_code: int) -> None:
-        row = fetch_one("SELECT StatusCode FROM Orders WHERE OrderCode = ?", (order_code,))
+        picker_id = self._current_picker_id()
+        if picker_id is None:
+            self.notification.emit("Доступ разрешён только сборщикам")
+            return
+        row = fetch_one(
+            "SELECT StatusCode, PickerCode FROM Orders WHERE OrderCode = ?",
+            (order_code,),
+        )
         if not row:
+            return
+        picker_code = row["PickerCode"]
+        if picker_code is not None and picker_code != picker_id:
+            self.notification.emit("Заказ уже назначен другому сборщику")
             return
         status = row["StatusCode"]
         if status not in STATUS_FLOW:
@@ -250,20 +279,44 @@ class Backend(QObject):
         resolve_time = datetime.now().isoformat(timespec="seconds") if new_status == 4 else None
         with get_connection() as conn:
             conn.execute(
-                "UPDATE Orders SET StatusCode = ?, ResolveTime = COALESCE(?, ResolveTime) WHERE OrderCode = ?",
-                (new_status, resolve_time, order_code),
+                """
+                UPDATE Orders
+                SET StatusCode = ?,
+                    ResolveTime = COALESCE(?, ResolveTime),
+                    PickerCode = COALESCE(PickerCode, ?)
+                WHERE OrderCode = ?
+                """,
+                (new_status, resolve_time, picker_id, order_code),
             )
         if new_status == 4:
             self._emit_receipt(order_code)
         self.requestPickerOrders()
 
+    @Slot(int)
+    def requestReceipt(self, order_code: int) -> None:
+        picker_id = self._current_picker_id()
+        if picker_id is None:
+            return
+        row = fetch_one(
+            "SELECT PickerCode FROM Orders WHERE OrderCode = ?",
+            (order_code,),
+        )
+        if not row:
+            return
+        picker_code = row["PickerCode"]
+        if picker_code is not None and picker_code != picker_id:
+            return
+        self._emit_receipt(order_code)
+
     def _emit_receipt(self, order_code: int) -> None:
         order = fetch_one(
             """
-            SELECT o.OrderCode, o.CreationTime, o.ResolveTime, o.TotalPrice,
+            SELECT o.OrderCode, o.StatusCode, s.StatusName,
+                   o.CreationTime, o.ResolveTime, o.TotalPrice,
                    c.Name, c.Surname
             FROM Orders o
             JOIN Customers c ON c.PhoneNumber = o.PhoneNumber
+            JOIN Statuses s ON s.StatusCode = o.StatusCode
             WHERE o.OrderCode = ?
             """,
             (order_code,),
