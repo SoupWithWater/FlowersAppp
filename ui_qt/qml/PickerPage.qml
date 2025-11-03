@@ -242,14 +242,17 @@ Page {
                         readonly property var order: modelData || ({})
 
                         width: (ListView.view ? ListView.view.width : ListView.width)
-                        height: 120
+                        implicitHeight: activeCardContent.implicitHeight + 32
                         radius: 20
                         color: ListView.isCurrentItem ? "#e0f2f1" : "white"
                         border.color: "#a5d6a7"
                         border.width: 1
 
-                        ColumnLayout {
-                            anchors.fill: parent
+                        Column {
+                            id: activeCardContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
                             anchors.margins: 16
                             spacing: 6
 
@@ -258,27 +261,32 @@ Page {
                                 font.pixelSize: 18
                                 font.bold: true
                                 color: "#2e7d32"
+                                wrapMode: Text.WordWrap
                             }
 
                             Label {
                                 text: qsTr("Клиент: %1 %2").arg(order.CustomerName || "").arg(order.CustomerSurname || "")
                                 color: "#33691e"
+                                wrapMode: Text.WordWrap
                             }
 
                             Label {
                                 text: qsTr("Статус: %1").arg(statusText(order.StatusCode))
                                 color: "#558b2f"
+                                wrapMode: Text.WordWrap
                             }
 
                             Label {
                                 text: qsTr("Сумма: %1").arg(formatMoney(order.TotalPrice))
                                 color: "#1b5e20"
+                                wrapMode: Text.WordWrap
                             }
 
                             Label {
                                 visible: !!order.PickerCode
                                 text: qsTr("Сборщик: %1 %2").arg(order.PickerName || "").arg(order.PickerSurname || "")
                                 color: "#2e7d32"
+                                wrapMode: Text.WordWrap
                             }
                         }
 
@@ -319,14 +327,17 @@ Page {
                         readonly property var order: modelData || ({})
 
                         width: (ListView.view ? ListView.view.width : ListView.width)
-                        height: 120
+                        implicitHeight: completedCardContent.implicitHeight + 32
                         radius: 20
                         color: ListView.isCurrentItem ? "#fff3e0" : "white"
                         border.color: "#ffe0b2"
                         border.width: 1
 
-                        ColumnLayout {
-                            anchors.fill: parent
+                        Column {
+                            id: completedCardContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
                             anchors.margins: 16
                             spacing: 6
 
@@ -335,21 +346,25 @@ Page {
                                 font.pixelSize: 18
                                 font.bold: true
                                 color: "#ef6c00"
+                                wrapMode: Text.WordWrap
                             }
 
                             Label {
                                 text: qsTr("Клиент: %1 %2").arg(order.CustomerName || "").arg(order.CustomerSurname || "")
                                 color: "#e65100"
+                                wrapMode: Text.WordWrap
                             }
 
                             Label {
                                 text: qsTr("Выдан: %1").arg(formatDateTime(order.ResolveTime))
                                 color: "#8d6e63"
+                                wrapMode: Text.WordWrap
                             }
 
                             Label {
                                 text: qsTr("Сумма: %1").arg(formatMoney(order.TotalPrice))
                                 color: "#4e342e"
+                                wrapMode: Text.WordWrap
                             }
                         }
 
@@ -486,7 +501,8 @@ Page {
                                             text: modelData.title
                                             font.bold: true
                                             color: modelData.color
-                                            Layout.preferredWidth: implicitWidth
+                                            wrapMode: Text.WordWrap
+                                            Layout.maximumWidth: detailColumn.width * 0.45
                                             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                         }
 
@@ -496,6 +512,7 @@ Page {
                                             Layout.fillWidth: true
                                             wrapMode: Text.WordWrap
                                             horizontalAlignment: Text.AlignRight
+                                            Layout.alignment: Qt.AlignRight | Qt.AlignTop
                                         }
                                     }
                                 }
@@ -532,6 +549,8 @@ Page {
                                             text: modelData.BouquetName
                                             Layout.fillWidth: true
                                             color: "#558b2f"
+                                            wrapMode: Text.WordWrap
+                                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                                         }
 
                                         Label {
