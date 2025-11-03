@@ -63,15 +63,26 @@ Page {
                     placeholderText: qsTr("Пароль")
                     echoMode: TextInput.Password
                     Layout.fillWidth: true
-                    implicitHeight: 48
-                    font.pixelSize: 18
-                    placeholderTextColor: "#5f6d5f"
+                    implicitHeight: 52
+                    font.pixelSize: 20
+                    leftPadding: 18
+                    rightPadding: 18
+                    placeholderTextColor: "#2e7d32"
                     color: "#1b5e20"
+                    font.bold: true
                     background: Rectangle {
-                        radius: 12
-                        border.color: "#81c784"
-                        border.width: 1.5
-                        color: "#f3fbf5"
+                        radius: 16
+                        border.color: "#1b5e20"
+                        border.width: 2
+                        color: "#ffffff"
+                        layer.enabled: true
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0
+                            verticalOffset: 3
+                            radius: 8
+                            samples: 16
+                            color: "#33000000"
+                        }
                     }
                 }
 
