@@ -51,18 +51,34 @@ Page {
 
             Item { Layout.fillWidth: true }
 
-            Button {
-                text: qsTr("Корзина (%1 • %2 ₽)").arg(root.cartCount).arg(Number(root.cartTotal).toLocaleString(Qt.locale(), 'f', 0))
-                background: Rectangle { color: "#2e7d32"; radius: 20 }
-                contentItem: Label {
-                    text: control.text
-                    color: "white"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                Layout.alignment: Qt.AlignVCenter
-                onClicked: cartPopup.open()
-            }
+Button
+{
+    text: qsTr("Корзина (%1 • %2 ₽)")
+    .arg(root.cartCount)
+    .arg(Number(root.cartTotal).toLocaleString(Qt.locale(), 'f', 0))
+
+    implicitHeight: 44
+    padding: 10
+
+    background: Rectangle {
+    color: "#2e7d32"
+    radius: 20
+}
+
+    contentItem: Label
+{
+    text: (parent as Button).text
+    color: "white"
+    font.pixelSize: 16
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+    elide: Text.ElideRight
+    wrapMode: Text.NoWrap
+}
+
+Layout.alignment: Qt.AlignVCenter
+onClicked: cartPopup.open()
+}
         }
     }
 
@@ -108,19 +124,29 @@ Page {
 
                     Item { Layout.fillHeight: true }
 
-                    Button {
-                        text: qsTr("В корзину")
-                        Layout.fillWidth: true
-                        implicitHeight: 40
-                        background: Rectangle { color: "#2e7d32"; radius: 18 }
-                        contentItem: Label {
-                            text: control.text
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        onClicked: backend.cartAdd(modelData.BouquetCode, 1)
-                    }
+Button
+{
+    text: qsTr("В корзину")
+    Layout.fillWidth: true
+    implicitHeight: 40
+
+    background: Rectangle {
+    color: "#2e7d32"
+    radius: 18
+}
+
+    contentItem: Label
+{
+    text: (parent as Button).text
+    color: "white"
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+    font.pixelSize: 16
+    font.bold: true
+}
+
+onClicked: backend.cartAdd(modelData.BouquetCode, 1)
+}
                 }
             }
         }
@@ -183,17 +209,23 @@ Page {
 
                         Label { text: qsTr("%1 ₽").arg(modelData.Total); color: "#1b5e20"; font.pixelSize: 16 }
 
-                        Button {
-                            text: "✕"
-                            background: Rectangle { color: "transparent" }
-                            contentItem: Label {
-                                text: control.text
-                                color: "#c62828"
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
-                            onClicked: backend.cartRemove(modelData.BouquetCode)
-                        }
+Button
+{
+    text: "✕"
+    background: Rectangle {color: "transparent"}
+
+    contentItem: Label
+{
+    text: (parent as Button).text
+    color: "#c62828"
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+    font.pixelSize: 20
+    font.bold: true
+}
+
+onClicked: backend.cartRemove(modelData.BouquetCode)
+}
                     }
                 }
                 footer: Label {
@@ -224,20 +256,30 @@ Page {
                 wrapMode: Text.WordWrap
             }
 
-            Button {
-                text: qsTr("Оформить заказ")
-                Layout.fillWidth: true
-                enabled: root.cartItems.length > 0
-                implicitHeight: 44
-                background: Rectangle { color: "#2e7d32"; radius: 22 }
-                contentItem: Label {
-                    text: control.text
-                    color: "white"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                onClicked: backend.placeOrder()
-            }
+Button
+{
+    text: qsTr("Оформить заказ")
+    Layout.fillWidth: true
+    enabled: root.cartItems.length > 0
+    implicitHeight: 44
+
+    background: Rectangle {
+    color: "#2e7d32"
+    radius: 22
+}
+
+    contentItem: Label
+{
+    text: (parent as Button).text
+    color: "white"
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+    font.pixelSize: 18
+    font.bold: true
+}
+
+onClicked: backend.placeOrder()
+}
         }
     }
 
