@@ -79,30 +79,22 @@ Page {
                         width: parent.width
                         placeholderText: qsTr("Пароль")
                         echoMode: TextInput.Password
-                        implicitHeight: 52
-                        font.pixelSize: 20
+                        implicitHeight: 48
+                        font.pixelSize: 18
                         leftPadding: 18
                         rightPadding: 18
-                        placeholderTextColor: "#2e7d32"
+                        placeholderTextColor: "#5f6d5f"
                         color: "#1b5e20"
-                        font.bold: true
                         background: Rectangle {
-                            radius: 16
-                            border.color: "#1b5e20"
-                            border.width: 2
-                            color: "#ffffff"
-                            layer.enabled: true
-                            layer.effect: DropShadow {
-                                horizontalOffset: 0
-                                verticalOffset: 3
-                                radius: 8
-                                samples: 16
-                                color: "#33000000"
-                            }
+                            radius: 12
+                            border.color: "#81c784"
+                            border.width: 1.5
+                            color: "#f3fbf5"
                         }
                     }
 
                     Button {
+                        id: loginButton
                         width: parent.width
                         text: qsTr("Войти")
                         implicitHeight: 44
@@ -111,7 +103,7 @@ Page {
                             radius: 22
                         }
                         contentItem: Label {
-                            text: parent.parent.text
+                            text: control.text
                             color: "white"
                             font.pixelSize: 18
                             horizontalAlignment: Text.AlignHCenter
