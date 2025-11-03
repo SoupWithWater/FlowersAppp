@@ -238,7 +238,10 @@ Page {
 
                     delegate: Rectangle {
                         required property int index
-                        width: ListView.view.width
+                        required property var modelData
+                        readonly property var order: modelData || ({})
+
+                        width: (ListView.view ? ListView.view.width : ListView.width)
                         height: 120
                         radius: 20
                         color: ListView.isCurrentItem ? "#e0f2f1" : "white"
@@ -251,30 +254,30 @@ Page {
                             spacing: 6
 
                             Label {
-                                text: qsTr("Заказ #%1").arg(modelData.OrderCode)
+                                text: qsTr("Заказ #%1").arg(order.OrderCode || "")
                                 font.pixelSize: 18
                                 font.bold: true
                                 color: "#2e7d32"
                             }
 
                             Label {
-                                text: qsTr("Клиент: %1 %2").arg(modelData.CustomerName).arg(modelData.CustomerSurname)
+                                text: qsTr("Клиент: %1 %2").arg(order.CustomerName || "").arg(order.CustomerSurname || "")
                                 color: "#33691e"
                             }
 
                             Label {
-                                text: qsTr("Статус: %1").arg(statusText(modelData.StatusCode))
+                                text: qsTr("Статус: %1").arg(statusText(order.StatusCode))
                                 color: "#558b2f"
                             }
 
                             Label {
-                                text: qsTr("Сумма: %1").arg(formatMoney(modelData.TotalPrice))
+                                text: qsTr("Сумма: %1").arg(formatMoney(order.TotalPrice))
                                 color: "#1b5e20"
                             }
 
                             Label {
-                                visible: !!modelData.PickerCode
-                                text: qsTr("Сборщик: %1 %2").arg(modelData.PickerName || "").arg(modelData.PickerSurname || "")
+                                visible: !!order.PickerCode
+                                text: qsTr("Сборщик: %1 %2").arg(order.PickerName || "").arg(order.PickerSurname || "")
                                 color: "#2e7d32"
                             }
                         }
@@ -312,7 +315,10 @@ Page {
 
                     delegate: Rectangle {
                         required property int index
-                        width: ListView.view.width
+                        required property var modelData
+                        readonly property var order: modelData || ({})
+
+                        width: (ListView.view ? ListView.view.width : ListView.width)
                         height: 120
                         radius: 20
                         color: ListView.isCurrentItem ? "#fff3e0" : "white"
@@ -325,24 +331,24 @@ Page {
                             spacing: 6
 
                             Label {
-                                text: qsTr("Заказ #%1").arg(modelData.OrderCode)
+                                text: qsTr("Заказ #%1").arg(order.OrderCode || "")
                                 font.pixelSize: 18
                                 font.bold: true
                                 color: "#ef6c00"
                             }
 
                             Label {
-                                text: qsTr("Клиент: %1 %2").arg(modelData.CustomerName).arg(modelData.CustomerSurname)
+                                text: qsTr("Клиент: %1 %2").arg(order.CustomerName || "").arg(order.CustomerSurname || "")
                                 color: "#e65100"
                             }
 
                             Label {
-                                text: qsTr("Выдан: %1").arg(formatDateTime(modelData.ResolveTime))
+                                text: qsTr("Выдан: %1").arg(formatDateTime(order.ResolveTime))
                                 color: "#8d6e63"
                             }
 
                             Label {
-                                text: qsTr("Сумма: %1").arg(formatMoney(modelData.TotalPrice))
+                                text: qsTr("Сумма: %1").arg(formatMoney(order.TotalPrice))
                                 color: "#4e342e"
                             }
                         }
@@ -406,7 +412,7 @@ Page {
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 8
+                            spacing: 12
 
                             Label {
                                 text: qsTr("Информация о заказе")
@@ -415,100 +421,83 @@ Page {
                                 color: "#2e7d32"
                             }
 
-                            GridLayout {
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                                columns: 2
-                                columnSpacing: 12
-                                rowSpacing: 6
+                                spacing: 8
 
-                                Label {
-                                    text: qsTr("Статус")
-                                    font.bold: true
-                                    color: "#2e7d32"
+                                function infoRow(title, value, color, visible) {
+                                    return {
+                                        title: title,
+                                        value: value,
+                                        color: color,
+                                        visible: visible === undefined ? true : visible
+                                    }
                                 }
 
-                                Label {
-                                    Layout.fillWidth: true
-                                    horizontalAlignment: Text.AlignRight
-                                    wrapMode: Text.WordWrap
-                                    text: statusText(selectedOrder.StatusCode)
-                                    color: "#2e7d32"
-                                }
+                                readonly property var rows: [
+                                    infoRow(
+                                        qsTr("Статус"),
+                                        selectedOrder ? statusText(selectedOrder.StatusCode) : "",
+                                        "#2e7d32"
+                                    ),
+                                    infoRow(
+                                        qsTr("Сборщик"),
+                                        selectedOrder && selectedOrder.PickerCode
+                                            ? qsTr("%1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
+                                            : qsTr("Не назначен"),
+                                        "#33691e"
+                                    ),
+                                    infoRow(
+                                        qsTr("Клиент"),
+                                        selectedOrder
+                                            ? qsTr("%1 %2").arg(selectedOrder.CustomerName || "").arg(selectedOrder.CustomerSurname || "")
+                                            : "",
+                                        "#558b2f"
+                                    ),
+                                    infoRow(
+                                        qsTr("Телефон"),
+                                        selectedOrder ? selectedOrder.CustomerPhone : "",
+                                        "#558b2f",
+                                        selectedOrder && !!selectedOrder.CustomerPhone
+                                    ),
+                                    infoRow(
+                                        qsTr("Создан"),
+                                        selectedOrder ? formatDateTime(selectedOrder.CreationTime) : "",
+                                        "#33691e"
+                                    ),
+                                    infoRow(
+                                        qsTr("Завершен"),
+                                        selectedOrder ? formatDateTime(selectedOrder.ResolveTime) : "",
+                                        "#33691e",
+                                        selectedOrder && !!selectedOrder.ResolveTime
+                                    )
+                                ]
 
-                                Label {
-                                    text: qsTr("Сборщик")
-                                    font.bold: true
-                                    color: "#33691e"
-                                }
+                                Repeater {
+                                    model: parent.rows
 
-                                Label {
-                                    Layout.fillWidth: true
-                                    horizontalAlignment: Text.AlignRight
-                                    wrapMode: Text.WordWrap
-                                    text: selectedOrder && selectedOrder.PickerCode
-                                          ? qsTr("%1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
-                                          : qsTr("Не назначен")
-                                    color: "#33691e"
-                                }
+                                    delegate: RowLayout {
+                                        required property var modelData
+                                        visible: modelData.visible
+                                        spacing: 8
+                                        Layout.fillWidth: true
 
-                                Label {
-                                    text: qsTr("Клиент")
-                                    font.bold: true
-                                    color: "#558b2f"
-                                }
+                                        Label {
+                                            text: modelData.title
+                                            font.bold: true
+                                            color: modelData.color
+                                            Layout.preferredWidth: implicitWidth
+                                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                        }
 
-                                Label {
-                                    Layout.fillWidth: true
-                                    horizontalAlignment: Text.AlignRight
-                                    wrapMode: Text.WordWrap
-                                    text: qsTr("%1 %2").arg(selectedOrder.CustomerName).arg(selectedOrder.CustomerSurname)
-                                    color: "#558b2f"
-                                }
-
-                                Label {
-                                    visible: !!selectedOrder.CustomerPhone
-                                    text: qsTr("Телефон")
-                                    font.bold: true
-                                    color: "#558b2f"
-                                }
-
-                                Label {
-                                    visible: !!selectedOrder.CustomerPhone
-                                    Layout.fillWidth: true
-                                    horizontalAlignment: Text.AlignRight
-                                    wrapMode: Text.WordWrap
-                                    text: qsTr("%1").arg(selectedOrder.CustomerPhone)
-                                    color: "#558b2f"
-                                }
-
-                                Label {
-                                    text: qsTr("Создан")
-                                    font.bold: true
-                                    color: "#33691e"
-                                }
-
-                                Label {
-                                    Layout.fillWidth: true
-                                    horizontalAlignment: Text.AlignRight
-                                    wrapMode: Text.WordWrap
-                                    text: formatDateTime(selectedOrder.CreationTime)
-                                    color: "#33691e"
-                                }
-
-                                Label {
-                                    visible: !!selectedOrder.ResolveTime
-                                    text: qsTr("Завершен")
-                                    font.bold: true
-                                    color: "#33691e"
-                                }
-
-                                Label {
-                                    visible: !!selectedOrder.ResolveTime
-                                    Layout.fillWidth: true
-                                    horizontalAlignment: Text.AlignRight
-                                    wrapMode: Text.WordWrap
-                                    text: formatDateTime(selectedOrder.ResolveTime)
-                                    color: "#33691e"
+                                        Label {
+                                            text: modelData.value || qsTr("—")
+                                            color: modelData.color
+                                            Layout.fillWidth: true
+                                            wrapMode: Text.WordWrap
+                                            horizontalAlignment: Text.AlignRight
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -567,17 +556,16 @@ Page {
                             }
                         }
 
-                        RowLayout {
+                        ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 12
 
-                            ColumnLayout {
+                            RowLayout {
                                 Layout.fillWidth: true
-                                spacing: 4
+                                spacing: 12
 
                                 Label {
                                     text: qsTr("Итого")
-                                    Layout.fillWidth: true
                                     font.pixelSize: 18
                                     font.bold: true
                                     color: "#1b5e20"
@@ -590,43 +578,51 @@ Page {
                                     font.bold: true
                                     color: "#1b5e20"
                                     font.family: "monospace"
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignRight
                                 }
                             }
 
-                            Button {
-                                visible: selectedOrder && selectedOrder.StatusCode < 4
-                                text: selectedOrder ? nextActionText(selectedOrder.StatusCode) : ""
+                            RowLayout {
                                 Layout.fillWidth: true
-                                enabled: selectedOrder && selectedOrder.StatusCode < 4
-                                implicitHeight: 44
-                                background: Rectangle { color: "#2e7d32"; radius: 22 }
-                                contentItem: Label {
-                                    text: (parent as Button).text
-                                    color: "white"
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
-                                    font.pixelSize: 16
-                                    font.bold: true
-                                }
-                                onClicked: backend.advanceOrderStatus(selectedOrder.OrderCode)
-                            }
+                                spacing: 12
 
-                            Button {
-                                visible: selectedOrder && receipt.order && receipt.order.StatusCode >= 4
-                                text: qsTr("Распечатать чек")
-                                Layout.fillWidth: selectedOrder && selectedOrder.StatusCode < 4 ? false : true
-                                Layout.preferredWidth: selectedOrder && selectedOrder.StatusCode < 4 ? undefined : parent.width
-                                implicitHeight: 44
-                                background: Rectangle { color: "#1b5e20"; radius: 22 }
-                                contentItem: Label {
-                                    text: (parent as Button).text
-                                    color: "white"
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
-                                    font.pixelSize: 16
-                                    font.bold: true
+                                Button {
+                                    id: advanceButton
+                                    visible: selectedOrder && selectedOrder.StatusCode < 4
+                                    text: selectedOrder ? nextActionText(selectedOrder.StatusCode) : ""
+                                    Layout.fillWidth: true
+                                    enabled: selectedOrder && selectedOrder.StatusCode < 4
+                                    implicitHeight: 44
+                                    background: Rectangle { color: "#2e7d32"; radius: 22 }
+                                    contentItem: Label {
+                                        text: (parent as Button).text
+                                        color: "white"
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        font.pixelSize: 16
+                                        font.bold: true
+                                    }
+                                    onClicked: backend.advanceOrderStatus(selectedOrder.OrderCode)
                                 }
-                                onClicked: backend.notification(qsTr("Чек отправлен на печать"))
+
+                                Button {
+                                    visible: selectedOrder && receipt.order && receipt.order.StatusCode >= 4
+                                    text: qsTr("Распечатать чек")
+                                    Layout.fillWidth: true
+                                    Layout.preferredWidth: advanceButton.visible ? undefined : parent.width
+                                    implicitHeight: 44
+                                    background: Rectangle { color: "#1b5e20"; radius: 22 }
+                                    contentItem: Label {
+                                        text: (parent as Button).text
+                                        color: "white"
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        font.pixelSize: 16
+                                        font.bold: true
+                                    }
+                                    onClicked: backend.notification(qsTr("Чек отправлен на печать"))
+                                }
                             }
                         }
                     }
