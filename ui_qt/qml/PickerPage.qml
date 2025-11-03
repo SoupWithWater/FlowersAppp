@@ -552,6 +552,24 @@ Page {
                                     Layout.fillWidth: true
                                     visible: completedTitle.visible
                                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                        Label {
+                                            text: modelData.title
+                                            font.bold: true
+                                            color: modelData.color
+                                            wrapMode: Text.WordWrap
+                                            Layout.maximumWidth: detailColumn.width * 0.45
+                                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                        }
+
+                                        Label {
+                                            text: modelData.value || qsTr("—")
+                                            color: modelData.color
+                                            Layout.fillWidth: true
+                                            wrapMode: Text.WordWrap
+                                            horizontalAlignment: Text.AlignRight
+                                            Layout.alignment: Qt.AlignRight | Qt.AlignTop
+                                        }
+                                    }
                                 }
                             }
                         }
