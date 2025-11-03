@@ -228,6 +228,7 @@ Page {
                         color: "#c8e6c9"
                         border.color: "#2e7d32"
                         border.width: 2
+                        z: -1
                     }
                     highlightMoveDuration: 150
                     onCurrentIndexChanged: {
@@ -301,6 +302,7 @@ Page {
                         color: "#ffe0b2"
                         border.color: "#fb8c00"
                         border.width: 2
+                        z: -1
                     }
                     highlightMoveDuration: 150
                     onCurrentIndexChanged: {
@@ -402,47 +404,110 @@ Page {
                         anchors.margins: 20
                         spacing: 12
 
-                        RowLayout {
+                        ColumnLayout {
                             Layout.fillWidth: true
+                            spacing: 8
 
-                            ColumnLayout {
+                            Label {
+                                text: qsTr("Информация о заказе")
+                                font.pixelSize: 18
+                                font.bold: true
+                                color: "#2e7d32"
+                            }
+
+                            GridLayout {
                                 Layout.fillWidth: true
-                                spacing: 4
+                                columns: 2
+                                columnSpacing: 12
+                                rowSpacing: 6
 
                                 Label {
-                                    text: qsTr("Статус: %1").arg(statusText(selectedOrder.StatusCode))
-                                    font.pixelSize: 18
+                                    text: qsTr("Статус")
                                     font.bold: true
                                     color: "#2e7d32"
                                 }
 
                                 Label {
-                                    text: selectedOrder && selectedOrder.PickerCode
-                                          ? qsTr("Сборщик: %1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
-                                          : qsTr("Сборщик не назначен")
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.WordWrap
+                                    text: statusText(selectedOrder.StatusCode)
+                                    color: "#2e7d32"
+                                }
+
+                                Label {
+                                    text: qsTr("Сборщик")
+                                    font.bold: true
                                     color: "#33691e"
                                 }
 
                                 Label {
-                                    text: qsTr("Клиент: %1 %2").arg(selectedOrder.CustomerName).arg(selectedOrder.CustomerSurname)
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.WordWrap
+                                    text: selectedOrder && selectedOrder.PickerCode
+                                          ? qsTr("%1 %2").arg(selectedOrder.PickerName || "").arg(selectedOrder.PickerSurname || "")
+                                          : qsTr("Не назначен")
+                                    color: "#33691e"
+                                }
+
+                                Label {
+                                    text: qsTr("Клиент")
+                                    font.bold: true
                                     color: "#558b2f"
                                 }
 
                                 Label {
-                                    text: selectedOrder && selectedOrder.CustomerPhone
-                                          ? qsTr("Телефон: %1").arg(selectedOrder.CustomerPhone)
-                                          : ""
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.WordWrap
+                                    text: qsTr("%1 %2").arg(selectedOrder.CustomerName).arg(selectedOrder.CustomerSurname)
                                     color: "#558b2f"
                                 }
 
                                 Label {
-                                    text: qsTr("Создан: %1").arg(formatDateTime(selectedOrder.CreationTime))
+                                    visible: !!selectedOrder.CustomerPhone
+                                    text: qsTr("Телефон")
+                                    font.bold: true
+                                    color: "#558b2f"
+                                }
+
+                                Label {
+                                    visible: !!selectedOrder.CustomerPhone
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.WordWrap
+                                    text: qsTr("%1").arg(selectedOrder.CustomerPhone)
+                                    color: "#558b2f"
+                                }
+
+                                Label {
+                                    text: qsTr("Создан")
+                                    font.bold: true
+                                    color: "#33691e"
+                                }
+
+                                Label {
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.WordWrap
+                                    text: formatDateTime(selectedOrder.CreationTime)
                                     color: "#33691e"
                                 }
 
                                 Label {
                                     visible: !!selectedOrder.ResolveTime
-                                    text: qsTr("Завершен: %1").arg(formatDateTime(selectedOrder.ResolveTime))
+                                    text: qsTr("Завершен")
+                                    font.bold: true
+                                    color: "#33691e"
+                                }
+
+                                Label {
+                                    visible: !!selectedOrder.ResolveTime
+                                    Layout.fillWidth: true
+                                    horizontalAlignment: Text.AlignRight
+                                    wrapMode: Text.WordWrap
+                                    text: formatDateTime(selectedOrder.ResolveTime)
                                     color: "#33691e"
                                 }
                             }
