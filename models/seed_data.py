@@ -7,8 +7,51 @@ from typing import Iterable
 from .database import executemany, fetch_all
 
 
-def _random_name(prefix: str, index: int) -> str:
-    return f"{prefix}{index:02d}"
+FIRST_NAMES = [
+    "Александр",
+    "Мария",
+    "Иван",
+    "София",
+    "Дмитрий",
+    "Екатерина",
+    "Никита",
+    "Ольга",
+    "Владимир",
+    "Наталья",
+    "Сергей",
+    "Татьяна",
+    "Кирилл",
+    "Полина",
+    "Максим",
+    "Вероника",
+    "Артём",
+    "Ксения",
+    "Фёдор",
+    "Лидия",
+]
+
+LAST_NAMES = [
+    "Иванов",
+    "Смирнова",
+    "Кузнецов",
+    "Попова",
+    "Соколов",
+    "Лебедева",
+    "Козлов",
+    "Новикова",
+    "Морозов",
+    "Петрова",
+    "Волков",
+    "Соловьёва",
+    "Зайцев",
+    "Васильева",
+    "Романов",
+    "Федорова",
+    "Михайлов",
+    "Макарова",
+    "Гаврилов",
+    "Павлова",
+]
 
 
 def insert_employees() -> None:
@@ -30,8 +73,8 @@ def insert_customers(count: int = 25) -> None:
         phone = f"+79{index:09d}"
         login = f"client{index:02d}"
         password = "client"
-        name = f"Клиент{index:02d}"
-        surname = f"Флора{index:02d}"
+        name = random.choice(FIRST_NAMES)
+        surname = random.choice(LAST_NAMES)
         customers.append((phone, login, password, name, surname))
     executemany(
         "INSERT OR IGNORE INTO Customers(PhoneNumber, Login, Password, Name, Surname) VALUES(?, ?, ?, ?, ?)",
@@ -42,14 +85,14 @@ def insert_customers(count: int = 25) -> None:
 def insert_flowers_and_bouquets() -> None:
     flowers = []
     bouquets = []
-    flower_names = [
-        "Роза красная",
-        "Роза белая",
-        "Тюльпан",
-        "Гербера",
-        "Пион",
-        "Хризантема",
-    ]
+    flower_names = {
+        "Роза красная": "красных роз",
+        "Роза белая": "белых роз",
+        "Тюльпан": "тюльпанов",
+        "Гербера": "гербер",
+        "Пион": "пионов",
+        "Хризантема": "хризантем",
+    }
     for name in flower_names:
         stock = random.randint(50, 150)
         flowers.append((name, stock))
@@ -58,11 +101,14 @@ def insert_flowers_and_bouquets() -> None:
     existing_flowers = fetch_all("SELECT TypeFlowerCode, Name FROM Flowers")
     for index in range(1, 31):
         flower = random.choice(existing_flowers)
+        count = random.randint(3, 11)
+        flower_plural = flower_names.get(flower["Name"], flower["Name"].lower())
+        bouquet_name = f"Букет из {count} {flower_plural}"
         bouquets.append(
             (
-                f"Букет №{index:02d}",
+                bouquet_name,
                 flower["TypeFlowerCode"],
-                random.randint(3, 11),
+                count,
                 random.choice(["Крафт", "Корзина", "Лента", "Коробка"]),
                 random.randint(900, 4500),
             )
