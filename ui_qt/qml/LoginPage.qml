@@ -35,7 +35,9 @@ Page {
             }
 
             Rectangle {
+                id: formCard
                 width: parent.width
+                implicitHeight: formColumn.implicitHeight + 48
                 radius: 24
                 color: "white"
                 opacity: 0.95
@@ -43,8 +45,15 @@ Page {
                 border.width: 2
 
                 Column {
-                    anchors.fill: parent
-                    anchors.margins: 24
+                    id: formColumn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 24
+                    anchors.rightMargin: 24
+                    anchors.top: parent.top
+                    anchors.topMargin: 24
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 24
                     spacing: 16
 
                     TextField {
