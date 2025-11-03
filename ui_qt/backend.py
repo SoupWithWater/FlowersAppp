@@ -42,6 +42,7 @@ class Backend(QObject):
     pickerOrdersChanged = Signal(list)
     receiptReady = Signal(dict)
     adminDataChanged = Signal(str, list)
+    orderPlaced = Signal(float)
     notification = Signal(str)
 
     def __init__(self) -> None:
@@ -214,6 +215,7 @@ class Backend(QObject):
                     (row["Count"] * count, bouquet_code),
                 )
         self.cartClear()
+        self.orderPlaced.emit(total_price)
         self.notification.emit("Заказ успешно создан")
         self.requestCatalog("")
 
