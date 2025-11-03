@@ -16,21 +16,29 @@ Page {
             anchors.margins: 12
             spacing: 12
 
+            Button {
+                text: qsTr("Выйти")
+                background: Rectangle { color: "#a5d6a7"; radius: 20 }
+                contentItem: Label {
+                    text: control.text
+                    color: "#2e7d32"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Layout.preferredWidth: implicitWidth
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: root.logoutRequested()
+            }
+
             Label {
                 text: qsTr("Сбор заказов")
                 font.pixelSize: 24
                 font.bold: true
                 color: "#2e7d32"
+                Layout.alignment: Qt.AlignVCenter
             }
 
             Item { Layout.fillWidth: true }
-
-            Button {
-                text: qsTr("Выйти")
-                background: Rectangle { color: "#a5d6a7"; radius: 20 }
-                contentItem: Label { text: parent.parent.text; color: "#2e7d32"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                onClicked: root.logoutRequested()
-            }
         }
     }
 
@@ -74,7 +82,12 @@ Page {
                         enabled: modelData.StatusCode < 4
                         implicitHeight: 40
                         background: Rectangle { color: "#2e7d32"; radius: 18 }
-                        contentItem: Label { text: parent.parent.text; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        contentItem: Label {
+                            text: control.text
+                            color: "white"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
                         onClicked: backend.advanceOrderStatus(modelData.OrderCode)
                     }
                 }
@@ -137,7 +150,12 @@ Page {
                             Layout.fillWidth: true
                             enabled: receipt.order && receipt.order.ResolveTime
                             background: Rectangle { color: "#2e7d32"; radius: 18 }
-                            contentItem: Label { text: parent.parent.text; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            contentItem: Label {
+                                text: control.text
+                                color: "white"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
                             onClicked: backend.notification("Чек отправлен на печать")
                         }
                     }

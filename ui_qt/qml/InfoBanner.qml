@@ -43,7 +43,7 @@ Item {
                     color: "white"
                 }
                 contentItem: Label {
-                    text: parent.parent.text
+                    text: control.text
                     color: "#2e7d32"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter

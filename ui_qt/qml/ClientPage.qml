@@ -18,6 +18,20 @@ Page {
             anchors.margins: 12
             spacing: 12
 
+            Button {
+                text: qsTr("Выйти")
+                background: Rectangle { color: "#a5d6a7"; radius: 20 }
+                contentItem: Label {
+                    text: control.text
+                    color: "#2e7d32"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Layout.preferredWidth: implicitWidth
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: root.logoutRequested()
+            }
+
             Label {
                 text: qsTr("Каталог букетов")
                 font.pixelSize: 24
@@ -32,24 +46,13 @@ Page {
                 text: qsTr("Корзина (%1 • %2 ₽)").arg(root.cartCount).arg(Number(root.cartTotal).toLocaleString(Qt.locale(), 'f', 0))
                 background: Rectangle { color: "#2e7d32"; radius: 20 }
                 contentItem: Label {
-                    text: parent.parent.text
+                    text: control.text
                     color: "white"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: cartDrawer.open()
-            }
-
-            Button {
-                text: qsTr("Выйти")
-                background: Rectangle { color: "#a5d6a7"; radius: 20 }
-                contentItem: Label {
-                    text: parent.parent.text
-                    color: "#2e7d32"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                onClicked: root.logoutRequested()
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: cartPopup.open()
             }
         }
     }
@@ -102,7 +105,7 @@ Page {
                         implicitHeight: 40
                         background: Rectangle { color: "#2e7d32"; radius: 18 }
                         contentItem: Label {
-                            text: parent.parent.text
+                            text: control.text
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -114,35 +117,49 @@ Page {
         }
     }
 
-    Drawer {
-        id: cartDrawer
-        width: Math.min(parent.width * 0.4, 420)
-        edge: Qt.RightEdge
+    Popup {
+        id: cartPopup
+        modal: true
+        focus: true
+        width: Math.min(parent.width * 0.6, 640)
+        height: Math.min(parent.height * 0.8, 560)
+        x: (parent.width - width) / 2
+        y: Math.max(24, (parent.height - height) / 2 - parent.height * 0.05)
+        padding: 24
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        background: Rectangle {
+            radius: 24
+            color: "white"
+            border.color: "#2e7d32"
+            border.width: 2
+        }
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 16
-            spacing: 12
+            spacing: 16
 
             Label {
                 text: qsTr("Корзина")
                 font.pixelSize: 24
                 font.bold: true
                 color: "#2e7d32"
+                Layout.alignment: Qt.AlignHCenter
             }
 
             ListView {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                clip: true
                 model: root.cartItems
+                spacing: 12
+                ScrollBar.vertical: ScrollBar { }
                 delegate: Rectangle {
-                    width: parent.width
+                    width: parent ? parent.width : 0
                     height: 80
                     radius: 16
                     color: "#e8f5e9"
                     border.color: "#2e7d32"
                     border.width: 1
-                    anchors.margins: 4
 
                     RowLayout {
                         anchors.fill: parent
@@ -160,7 +177,12 @@ Page {
                         Button {
                             text: "✕"
                             background: Rectangle { color: "transparent" }
-                            contentItem: Label { text: parent.parent.text; color: "#c62828" }
+                            contentItem: Label {
+                                text: control.text
+                                color: "#c62828"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
                             onClicked: backend.cartRemove(modelData.BouquetCode)
                         }
                     }
@@ -179,6 +201,7 @@ Page {
                 font.pixelSize: 20
                 font.bold: true
                 color: "#1b5e20"
+                Layout.alignment: Qt.AlignHCenter
             }
 
             Button {
@@ -188,14 +211,14 @@ Page {
                 implicitHeight: 44
                 background: Rectangle { color: "#2e7d32"; radius: 22 }
                 contentItem: Label {
-                    text: parent.parent.text
+                    text: control.text
                     color: "white"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
                 onClicked: {
                     backend.placeOrder()
-                    cartDrawer.close()
+                    cartPopup.close()
                 }
             }
         }
