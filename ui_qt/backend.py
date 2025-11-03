@@ -233,26 +233,48 @@ class Backend(QObject):
     @Slot()
     def requestPickerOrders(self) -> None:
         picker_id = self._current_picker_id()
-        picker_filter = ""
         params: dict[str, Any] | None = None
-        if picker_id is not None:
-            picker_filter = "AND (o.PickerCode IS NULL OR o.PickerCode = :picker)"
+        if picker_id is None:
+            sql = (
+                """
+                SELECT o.OrderCode, o.StatusCode, s.StatusName, o.CreationTime, o.ResolveTime, o.TotalPrice,
+                       c.Name AS CustomerName, c.Surname AS CustomerSurname, c.PhoneNumber AS CustomerPhone,
+                       o.PickerCode,
+                       e.Name AS PickerName, e.Surname AS PickerSurname
+                FROM Orders o
+                JOIN Statuses s ON s.StatusCode = o.StatusCode
+                JOIN Customers c ON c.PhoneNumber = o.PhoneNumber
+                LEFT JOIN Employees e ON e.EmployeeCode = o.PickerCode
+                WHERE o.StatusCode IN (1, 2, 3)
+                ORDER BY o.CreationTime ASC
+                """
+            )
+        else:
+            sql = (
+                """
+                SELECT o.OrderCode, o.StatusCode, s.StatusName, o.CreationTime, o.ResolveTime, o.TotalPrice,
+                       c.Name AS CustomerName, c.Surname AS CustomerSurname, c.PhoneNumber AS CustomerPhone,
+                       o.PickerCode,
+                       e.Name AS PickerName, e.Surname AS PickerSurname
+                FROM Orders o
+                JOIN Statuses s ON s.StatusCode = o.StatusCode
+                JOIN Customers c ON c.PhoneNumber = o.PhoneNumber
+                LEFT JOIN Employees e ON e.EmployeeCode = o.PickerCode
+                WHERE (
+                        o.StatusCode IN (1, 2, 3)
+                        AND (o.PickerCode IS NULL OR o.PickerCode = :picker)
+                    )
+                    OR (
+                        o.StatusCode >= 4
+                        AND o.PickerCode = :picker
+                    )
+                ORDER BY
+                    CASE WHEN o.StatusCode < 4 THEN 0 ELSE 1 END,
+                    o.CreationTime ASC,
+                    COALESCE(o.ResolveTime, o.CreationTime) DESC
+                """
+            )
             params = {"picker": picker_id}
-        sql = (
-            """
-            SELECT o.OrderCode, o.StatusCode, s.StatusName, o.CreationTime, o.ResolveTime, o.TotalPrice,
-                   c.Name AS CustomerName, c.Surname AS CustomerSurname,
-                   o.PickerCode,
-                   e.Name AS PickerName, e.Surname AS PickerSurname
-            FROM Orders o
-            JOIN Statuses s ON s.StatusCode = o.StatusCode
-            JOIN Customers c ON c.PhoneNumber = o.PhoneNumber
-            LEFT JOIN Employees e ON e.EmployeeCode = o.PickerCode
-            WHERE o.StatusCode IN (1, 2, 3)
-              {picker_filter}
-            ORDER BY o.CreationTime ASC
-            """
-        ).format(picker_filter=picker_filter)
         rows = fetch_all(sql, params)
         self.pickerOrdersChanged.emit([dict(row) for row in rows])
 
@@ -313,7 +335,7 @@ class Backend(QObject):
             """
             SELECT o.OrderCode, o.StatusCode, s.StatusName,
                    o.CreationTime, o.ResolveTime, o.TotalPrice,
-                   c.Name, c.Surname
+                   c.Name, c.Surname, c.PhoneNumber
             FROM Orders o
             JOIN Customers c ON c.PhoneNumber = o.PhoneNumber
             JOIN Statuses s ON s.StatusCode = o.StatusCode
