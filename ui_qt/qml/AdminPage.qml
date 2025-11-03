@@ -17,6 +17,20 @@ Page {
             anchors.margins: 12
             spacing: 12
 
+            Button {
+                text: qsTr("Выйти")
+                background: Rectangle { color: "#a5d6a7"; radius: 20 }
+                contentItem: Text {
+                    anchors.fill: parent
+                    text: control.text
+                    color: "#2e7d32"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                onClicked: root.logoutRequested()
+            }
+
             Label {
                 text: qsTr("Администрирование")
                 font.pixelSize: 24
@@ -25,13 +39,6 @@ Page {
             }
 
             Item { Layout.fillWidth: true }
-
-            Button {
-                text: qsTr("Выйти")
-                background: Rectangle { color: "#a5d6a7"; radius: 20 }
-                contentItem: Label { text: parent.parent.text; color: "#2e7d32"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                onClicked: root.logoutRequested()
-            }
         }
     }
 
@@ -135,14 +142,26 @@ Page {
                             text: qsTr("Назад")
                             Layout.fillWidth: true
                             background: Rectangle { color: "#a5d6a7"; radius: 18 }
-                            contentItem: Label { text: parent.parent.text; color: "#2e7d32"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            contentItem: Text {
+                                anchors.fill: parent
+                                text: control.text
+                                color: "#2e7d32"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
                             onClicked: root.clearSelection()
                         }
                         Button {
                             text: qsTr("Сохранить")
                             Layout.fillWidth: true
                             background: Rectangle { color: "#2e7d32"; radius: 18 }
-                            contentItem: Label { text: parent.parent.text; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            contentItem: Text {
+                                anchors.fill: parent
+                                text: control.text
+                                color: "white"
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
                             onClicked: root.saveCurrent()
                         }
                     }
@@ -151,7 +170,13 @@ Page {
                         text: qsTr("Удалить")
                         Layout.fillWidth: true
                         background: Rectangle { color: "#c62828"; radius: 18 }
-                        contentItem: Label { text: parent.parent.text; color: "white"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        contentItem: Text {
+                            anchors.fill: parent
+                            text: control.text
+                            color: "white"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
                         onClicked: root.deleteCurrent()
                     }
                 }
