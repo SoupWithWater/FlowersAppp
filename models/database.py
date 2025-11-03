@@ -3,16 +3,28 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
+
 _DB_FILENAME = "flowers.db"
 
 
 def _find_project_root() -> Path:
+    """Return a stable project root for locating the database file.
+
+    Previously we attempted to discover the root by searching for an existing
+    ``flowers.db`` file in the current path hierarchy.  When a user already had
+    a database file with the same name somewhere above the project directory
+    (for example in the home directory), the search would incorrectly stop
+    there.  As a result, the CLI utilities operated on that external database
+    while the repository copy remained empty, which looked like seeding simply
+    did not work.
+
+    The project layout is static, so we can reliably anchor the database next
+    to the repository root (the parent of the ``models`` package).
+    """
+
     current = Path(__file__).resolve()
-    for parent in [current] + list(current.parents):
-        candidate = parent / _DB_FILENAME
-        if candidate.exists():
-            return candidate.parent
-    return Path(__file__).resolve().parent.parent
+    # ``models`` lives one level below the repository root.
+    return current.parent.parent
 
 
 def database_path() -> Path:
