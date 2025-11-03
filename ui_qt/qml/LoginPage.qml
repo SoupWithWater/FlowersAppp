@@ -27,7 +27,7 @@ Page {
 
             Label {
                 width: parent.width
-                text: qsTr("Цветочный магазин")
+                text: qsTr("Цветочный")
                 font.pixelSize: 32
                 font.bold: true
                 color: "white"
@@ -94,23 +94,29 @@ Page {
                     }
 
                     Button {
-                        id: loginButton
+                        id: control
                         width: parent.width
                         text: qsTr("Войти")
                         implicitHeight: 44
+                        padding: 10
+                        font.pixelSize: 18
+
                         background: Rectangle {
                             color: "#2e7d32"
                             radius: 22
                         }
-                        contentItem: Label {
-                            text: control.text
-                            color: "white"
-                            font.pixelSize: 18
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        onClicked: backend.login(loginField.text, passwordField.text)
-                    }
+
+                            contentItem: Label
+{
+    text: control.text
+    color: "white" // < -- белый цвет текста
+    font.pixelSize: control.font.pixelSize
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+}
+
+onClicked: backend.login(loginField.text, passwordField.text)
+}
 
                     Label {
                         id: errorLabel

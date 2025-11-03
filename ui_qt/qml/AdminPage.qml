@@ -17,19 +17,27 @@ Page {
             anchors.margins: 12
             spacing: 12
 
+
             Button {
+                id: control
                 text: qsTr("Выйти")
-                background: Rectangle { color: "#a5d6a7"; radius: 20 }
-                contentItem: Label {
-                    text: control.text
-                    color: "#2e7d32"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: 16
-                    font.bold: true
+
+                background: Rectangle {
+                    color: "#a5d6a7"
+                    radius: 20
                 }
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                onClicked: root.logoutRequested()
+
+                    contentItem: Label {
+                        text: control.text
+                        color: "#2e7d32"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 16
+                        font.bold: true
+                    }
+
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                    onClicked: root.logoutRequested()
             }
 
             Label {
@@ -224,20 +232,29 @@ Page {
                                 }
                             }
 
-                            Button {
-                                text: "✏️"
-                                Layout.preferredWidth: 48
-                                Layout.preferredHeight: 40
-                                background: Rectangle { color: "#a5d6a7"; radius: 18 }
-                                contentItem: Label {
-                                    text: control.text
-                                    color: "#1b5e20"
-                                    font.pixelSize: 20
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
-                                }
-                                onClicked: root.openRecord(modelData, false)
-                            }
+
+    Button {
+        id: control
+        text: "✏️"
+        Layout.preferredWidth: 48
+        Layout.preferredHeight: 40
+
+        background: Rectangle {
+            color: "#a5d6a7"
+            radius: 18
+        }
+
+            contentItem: Label
+{
+    text: control.text
+    color: "#1b5e20"
+    font.pixelSize: 20
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+}
+
+onClicked: root.openRecord(modelData, false)
+}
                         }
                     }
 

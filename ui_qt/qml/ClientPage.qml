@@ -20,18 +20,26 @@ Page {
             spacing: 12
 
             Button {
+                id: control
                 text: qsTr("Выйти")
-                background: Rectangle { color: "#a5d6a7"; radius: 20 }
-                contentItem: Label {
-                    text: control.text
-                    color: "#2e7d32"
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+
+                background: Rectangle {
+                    color: "#a5d6a7"
+                    radius: 20
                 }
-                Layout.preferredWidth: implicitWidth
-                Layout.alignment: Qt.AlignVCenter
-                onClicked: root.logoutRequested()
-            }
+
+                    contentItem: Label {
+            text: control.text
+            color: "#2e7d32"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 16
+            font.bold: true
+        }
+
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+    onClicked: root.logoutRequested()
+}
 
             Label {
                 text: qsTr("Каталог букетов")
