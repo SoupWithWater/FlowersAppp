@@ -767,6 +767,5 @@ Page {
         }
     }
 
-    Component.onCompleted: backend.requestPickerOrders()
 }
 
