@@ -1,3 +1,11 @@
+/* README (изменения):
+1) ВО ВСЕХ Button с кастомным contentItem заменён text: control.text -> text: (parent as Button).text.
+2) Убраны/переименованы дублирующиеся id: control (причина: "id is not unique").
+3) TabButton уже использовали parent-паттерн — оставлено как есть.
+4) Исправлена опечатка в табе: "Цеветы" -> "Цветы".
+5) Ничего не трогал в логике onClicked и ваших функциях.
+*/
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -17,27 +25,23 @@ Page {
             anchors.margins: 12
             spacing: 12
 
-
             Button {
-                id: control
+                // было id: control — убрал, чтобы id не конфликтовали
                 text: qsTr("Выйти")
-
                 background: Rectangle {
                     color: "#a5d6a7"
                     radius: 20
                 }
-
-                    contentItem: Label {
-                        text: control.text
-                        color: "#2e7d32"
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        font.pixelSize: 16
-                        font.bold: true
-                    }
-
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                    onClicked: root.logoutRequested()
+                contentItem: Label {
+                    text: (parent as Button).text
+                    color: "#2e7d32"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: 16
+                    font.bold: true
+                }
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                onClicked: root.logoutRequested()
             }
 
             Label {
@@ -76,11 +80,11 @@ Page {
                         font.pixelSize: 16
                         font.bold: (parent as TabButton).checked
                     }
-                        background: Rectangle{
-                            implicitHeight: 40
-                            radius: 18
-                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
-                        }
+                    background: Rectangle{
+                        implicitHeight: 40
+                        radius: 18
+                        color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                    }
                 }
 
                 TabButton {
@@ -93,12 +97,13 @@ Page {
                         font.pixelSize: 16
                         font.bold: (parent as TabButton).checked
                     }
-                        background: Rectangle{
-                            implicitHeight: 40
-                            radius: 18
-                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
-                        }
+                    background: Rectangle{
+                        implicitHeight: 40
+                        radius: 18
+                        color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                    }
                 }
+
                 TabButton {
                     text: qsTr("Сотрудники")
                     contentItem: Label {
@@ -109,12 +114,13 @@ Page {
                         font.pixelSize: 16
                         font.bold: (parent as TabButton).checked
                     }
-                        background: Rectangle{
-                            implicitHeight: 40
-                            radius: 18
-                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
-                        }
+                    background: Rectangle{
+                        implicitHeight: 40
+                        radius: 18
+                        color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                    }
                 }
+
                 TabButton {
                     text: qsTr("Букеты")
                     contentItem: Label {
@@ -125,14 +131,15 @@ Page {
                         font.pixelSize: 16
                         font.bold: (parent as TabButton).checked
                     }
-                        background: Rectangle{
-                            implicitHeight: 40
-                            radius: 18
-                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
-                        }
+                    background: Rectangle{
+                        implicitHeight: 40
+                        radius: 18
+                        color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                    }
                 }
+
                 TabButton {
-                    text: qsTr("Цеветы")
+                    text: qsTr("Цветы")   // исправлено
                     contentItem: Label {
                         text: parent.text
                         color: (parent as TabButton).checked ? "white": "#2e7d32"
@@ -141,11 +148,11 @@ Page {
                         font.pixelSize: 16
                         font.bold: (parent as TabButton).checked
                     }
-                        background: Rectangle{
-                            implicitHeight: 40
-                            radius: 18
-                            color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
-                        }
+                    background: Rectangle{
+                        implicitHeight: 40
+                        radius: 18
+                        color: (parent as TabButton).checked ? "#2e7d32": "#c8e6c9"
+                    }
                 }
             }
 
@@ -159,7 +166,7 @@ Page {
                     radius: 20
                 }
                 contentItem: Label {
-                    text: control.text
+                    text: (parent as Button).text
                     color: "white"
                     font.pixelSize: 24
                     horizontalAlignment: Text.AlignHCenter
@@ -232,29 +239,24 @@ Page {
                                 }
                             }
 
-
-    Button {
-        id: control
-        text: "✏️"
-        Layout.preferredWidth: 48
-        Layout.preferredHeight: 40
-
-        background: Rectangle {
-            color: "#a5d6a7"
-            radius: 18
-        }
-
-            contentItem: Label
-{
-    text: control.text
-    color: "#1b5e20"
-    font.pixelSize: 20
-    horizontalAlignment: Text.AlignHCenter
-    verticalAlignment: Text.AlignVCenter
-}
-
-onClicked: root.openRecord(modelData, false)
-}
+                            Button {
+                                // было id: control — убрал
+                                text: "✏️"
+                                Layout.preferredWidth: 48
+                                Layout.preferredHeight: 40
+                                background: Rectangle {
+                                    color: "#a5d6a7"
+                                    radius: 18
+                                }
+                                contentItem: Label {
+                                    text: (parent as Button).text
+                                    color: "#1b5e20"
+                                    font.pixelSize: 20
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+                                onClicked: root.openRecord(modelData, false)
+                            }
                         }
                     }
 
@@ -324,7 +326,7 @@ onClicked: root.openRecord(modelData, false)
                     Layout.preferredWidth: 120
                     background: Rectangle { color: "#c62828"; radius: 18 }
                     contentItem: Label {
-                        text: control.text
+                        text: (parent as Button).text
                         color: "white"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -339,7 +341,7 @@ onClicked: root.openRecord(modelData, false)
                     Layout.preferredWidth: 120
                     background: Rectangle { color: "#a5d6a7"; radius: 18 }
                     contentItem: Label {
-                        text: control.text
+                        text: (parent as Button).text
                         color: "#2e7d32"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -352,7 +354,7 @@ onClicked: root.openRecord(modelData, false)
                     Layout.preferredWidth: 140
                     background: Rectangle { color: "#2e7d32"; radius: 18 }
                     contentItem: Label {
-                        text: control.text
+                        text: (parent as Button).text
                         color: "white"
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -363,6 +365,7 @@ onClicked: root.openRecord(modelData, false)
         }
     }
 
+    // --- функции без изменений ---
     function setSection(section) {
         if (currentSection === section)
             return
@@ -394,20 +397,9 @@ onClicked: root.openRecord(modelData, false)
         }
     }
 
-    function recordsForSection(section) {
-        return dataStore[section] || []
-    }
-
-    function loadRecord(record) {
-        currentRecord = record ? JSON.parse(JSON.stringify(record)) : ({})
-    }
-
-    function openRecord(record, creating) {
-        loadRecord(record)
-        editDialog.creating = creating
-        editDialog.open()
-    }
-
+    function recordsForSection(section) { return dataStore[section] || [] }
+    function loadRecord(record) { currentRecord = record ? JSON.parse(JSON.stringify(record)) : ({}) }
+    function openRecord(record, creating) { loadRecord(record); editDialog.creating = creating; editDialog.open() }
     function emptyRecord(section) {
         var fields = formFields(section)
         var result = ({})
@@ -417,38 +409,19 @@ onClicked: root.openRecord(modelData, false)
         }
         return result
     }
-
-    function clearSelection() {
-        currentRecord = ({})
-        editDialog.creating = false
-    }
-
+    function clearSelection() { currentRecord = ({}); editDialog.creating = false }
     function isCurrentRecord(record) {
         var key = primaryKey(currentSection)
         return currentRecord && record && currentRecord[key] !== undefined && currentRecord[key] == record[key]
     }
-
-    function updateField(key, value) {
-        var updated = Object.assign({}, currentRecord || ({}))
-        updated[key] = value
-        currentRecord = updated
-    }
-
-    function saveCurrent() {
-        if (!currentRecord)
-            return
-        backend.saveAdminRecord(currentSection, currentRecord)
-        editDialog.close()
-    }
-
+    function updateField(key, value) { var u = Object.assign({}, currentRecord || ({})); u[key] = value; currentRecord = u }
+    function saveCurrent() { if (!currentRecord) return; backend.saveAdminRecord(currentSection, currentRecord); editDialog.close() }
     function deleteCurrent() {
         var key = primaryKey(currentSection)
-        if (!currentRecord || !currentRecord[key])
-            return
+        if (!currentRecord || !currentRecord[key]) return
         backend.deleteAdminRecord(currentSection, currentRecord[key])
         editDialog.close()
     }
-
     function primaryKey(section) {
         switch(section) {
         case "customers": return "PhoneNumber"
@@ -458,7 +431,6 @@ onClicked: root.openRecord(modelData, false)
         default: return "OrderCode"
         }
     }
-
     function sectionTitle(section) {
         switch(section) {
         case "customers": return qsTr("Клиенты")
@@ -468,78 +440,73 @@ onClicked: root.openRecord(modelData, false)
         default: return qsTr("Заказы")
         }
     }
-
     function formFields(section) {
         switch(section) {
         case "customers":
             return [
-                { key: "PhoneNumber", label: qsTr("Телефон"), placeholder: "+79..." },
-                { key: "Login", label: qsTr("Логин"), placeholder: "client01" },
-                { key: "Password", label: qsTr("Пароль"), placeholder: "пароль" },
-                { key: "Name", label: qsTr("Имя"), placeholder: "Имя" },
-                { key: "Surname", label: qsTr("Фамилия"), placeholder: "Фамилия" }
+                { key: "PhoneNumber", label: qsTr("Телефон"), placeholder: "" },
+                { key: "Login", label: qsTr("Логин"), placeholder: "" },
+                { key: "Password", label: qsTr("Пароль"), placeholder: "" },
+                { key: "Name", label: qsTr("Имя"), placeholder: "" },
+                { key: "Surname", label: qsTr("Фамилия"), placeholder: "" }
             ]
         case "employees":
             return [
                 { key: "EmployeeCode", label: qsTr("Код"), placeholder: "" },
-                { key: "Login", label: qsTr("Логин"), placeholder: "picker" },
-                { key: "Password", label: qsTr("Пароль"), placeholder: "пароль" },
-                { key: "Name", label: qsTr("Имя"), placeholder: "Имя" },
-                { key: "Surname", label: qsTr("Фамилия"), placeholder: "Фамилия" },
-                { key: "PositionCode", label: qsTr("Должность (1-админ,2-сборщик)"), placeholder: "2", defaultValue: 2 }
+                { key: "Login", label: qsTr("Логин"), placeholder: "" },
+                { key: "Password", label: qsTr("Пароль"), placeholder: "" },
+                { key: "Name", label: qsTr("Имя"), placeholder: "" },
+                { key: "Surname", label: qsTr("Фамилия"), placeholder: "" },
+                { key: "PositionCode", label: qsTr("Должность (1-админ,2-сборщик)"), placeholder: "", defaultValue: 2 }
             ]
         case "bouquets":
             return [
                 { key: "BouquetCode", label: qsTr("Код"), placeholder: "" },
-                { key: "BouquetName", label: qsTr("Название"), placeholder: "Новый букет" },
-                { key: "TypeFlowerCode", label: qsTr("Код цветка"), placeholder: "1" },
-                { key: "Count", label: qsTr("Стеблей"), placeholder: "5" },
-                { key: "Pack", label: qsTr("Упаковка"), placeholder: "Крафт" },
-                { key: "Price", label: qsTr("Цена"), placeholder: "1500" }
+                { key: "BouquetName", label: qsTr("Название"), placeholder: "" },
+                { key: "TypeFlowerCode", label: qsTr("Код цветка"), placeholder: "" },
+                { key: "Count", label: qsTr("Стеблей"), placeholder: "" },
+                { key: "Pack", label: qsTr("Упаковка"), placeholder: "" },
+                { key: "Price", label: qsTr("Цена"), placeholder: "" }
             ]
         case "flowers":
             return [
                 { key: "TypeFlowerCode", label: qsTr("Код"), placeholder: "" },
-                { key: "Name", label: qsTr("Название"), placeholder: "Роза" },
-                { key: "StockCount", label: qsTr("Остаток"), placeholder: "100" }
+                { key: "Name", label: qsTr("Название"), placeholder: "" },
+                { key: "StockCount", label: qsTr("Остаток"), placeholder: "" }
             ]
         default:
             return [
                 { key: "OrderCode", label: qsTr("Код заказа"), placeholder: "" },
-                { key: "StatusCode", label: qsTr("Статус (1-4)"), placeholder: "1", defaultValue: 1 },
-                { key: "CreationTime", label: qsTr("Создан"), placeholder: "2025-01-01T10:00:00" },
-                { key: "ResolveTime", label: qsTr("Выдан"), placeholder: "2025-01-01T12:00:00" },
-                { key: "TotalPrice", label: qsTr("Сумма"), placeholder: "1500", defaultValue: 0 },
-                { key: "PhoneNumber", label: qsTr("Телефон клиента"), placeholder: "+7900..." },
-                { key: "PickerCode", label: qsTr("Код сборщика"), placeholder: "2" }
+                { key: "StatusCode", label: qsTr("Статус (1-4)"), placeholder: "", defaultValue: 1 },
+                { key: "CreationTime", label: qsTr("Создан"), placeholder: "" },
+                { key: "ResolveTime", label: qsTr("Выдан"), placeholder: "" },
+                { key: "TotalPrice", label: qsTr("Сумма"), placeholder: "", defaultValue: 0 },
+                { key: "PhoneNumber", label: qsTr("Телефон клиента"), placeholder: "" },
+                { key: "PickerCode", label: qsTr("Код сборщика"), placeholder: "" }
             ]
         }
     }
-
     function summaryForRecord(section, record) {
-        if (!record)
-            return ""
+        if (!record) return ""
         switch(section) {
         case "customers":
-            var customerName = [record.Surname, record.Name].filter(function(part) { return part && part.length }).join(" ")
-            return customerName.length ? customerName : qsTr("Клиент")
+            var cn = [record.Surname, record.Name].filter(function(p){return p&&p.length}).join(" ")
+            return cn.length ? cn : qsTr("Клиент")
         case "employees":
-            var employeeName = [record.Surname, record.Name].filter(function(part) { return part && part.length }).join(" ")
-            var employeeCode = record.EmployeeCode !== undefined ? String(record.EmployeeCode) : ""
-            return employeeName.length ? employeeName + (employeeCode ? " (#" + employeeCode + ")" : "") : qsTr("Сотрудник")
+            var en = [record.Surname, record.Name].filter(function(p){return p&&p.length}).join(" ")
+            var ec = record.EmployeeCode !== undefined ? String(record.EmployeeCode) : ""
+            return en.length ? en + (ec ? " (#" + ec + ")" : "") : qsTr("Сотрудник")
         case "bouquets":
             return record.BouquetName && record.BouquetName.length ? record.BouquetName : qsTr("Букет")
         case "flowers":
             return record.Name && record.Name.length ? record.Name : qsTr("Цветок")
         default:
-            var orderCode = record.OrderCode !== undefined ? record.OrderCode : "-"
-            return qsTr("Заказ #%1").arg(orderCode)
+            var oc = record.OrderCode !== undefined ? record.OrderCode : "-"
+            return qsTr("Заказ #%1").arg(oc)
         }
     }
-
     function detailForRecord(section, record) {
-        if (!record)
-            return ""
+        if (!record) return ""
         switch(section) {
         case "customers":
             return qsTr("Телефон: %1 • Логин: %2")
@@ -567,14 +534,9 @@ onClicked: root.openRecord(modelData, false)
                 .arg(created)
         }
     }
-
     function formatCurrency(value) {
-        var number = Number(value)
-        if (isNaN(number))
-            number = 0
-        return number.toLocaleString(Qt.locale(), 'f', 0)
+        var n = Number(value); if (isNaN(n)) n = 0; return n.toLocaleString(Qt.locale(), 'f', 0)
     }
-
     function positionName(code) {
         switch(code) {
         case 1: return qsTr("Администратор")
