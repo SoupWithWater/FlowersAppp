@@ -187,11 +187,29 @@ class Backend(QObject):
         bouquet_codes = list(self._cart.keys())
         placeholders = ",".join(["?"] * len(bouquet_codes))
         bouquet_rows = fetch_all(
-            f"SELECT BouquetCode, Count FROM Bouquets WHERE BouquetCode IN ({placeholders})",
+            f"SELECT BouquetCode, BouquetName, TypeFlowerCode, Count FROM Bouquets WHERE BouquetCode IN ({placeholders})",
             tuple(bouquet_codes),
         )
         with get_connection() as conn:
             cursor = conn.cursor()
+            for row in bouquet_rows:
+                bouquet_code = row["BouquetCode"]
+                count = self._cart.get(bouquet_code, 0)
+                if count <= 0:
+                    continue
+                required_stems = row["Count"] * count
+                stock_row = cursor.execute(
+                    "SELECT StockCount FROM Flowers WHERE TypeFlowerCode = ?",
+                    (row["TypeFlowerCode"],),
+                ).fetchone()
+                available = stock_row["StockCount"] if stock_row else 0
+                if required_stems > available:
+                    max_bouquets = available // row["Count"] if row["Count"] else 0
+                    conn.rollback()
+                    self.notification.emit(
+                        f"Недостаточно цветов для букета «{row['BouquetName']}». Доступно только {max_bouquets} букетов."
+                    )
+                    return
             total_price = self.cartTotalPrice()
             cursor.execute(
                 "INSERT INTO Orders(StatusCode, CreationTime, TotalPrice, PhoneNumber) VALUES(1, ?, ?, ?)",
