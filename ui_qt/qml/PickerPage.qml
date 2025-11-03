@@ -13,6 +13,115 @@ Page {
     property int completedCurrentIndex: -1
     property var selectedOrder: null
     property var receipt: ({})
+    property int tabWatcher: tabs ? tabs.currentIndex : 0
+
+    onTabWatcherChanged: ensureSelectionForTab(tabWatcher)
+    Component.onCompleted: ensureSelectionForTab(tabs.currentIndex)
+
+    function statusText(statusCode) {
+        switch (statusCode) {
+        case 1:
+            return qsTr("Оформлен")
+        case 2:
+            return qsTr("Сборка")
+        case 3:
+            return qsTr("Готов")
+        case 4:
+            return qsTr("Выдан")
+        default:
+            return qsTr("Неизвестно")
+        }
+    }
+
+    function nextActionText(statusCode) {
+        switch (statusCode) {
+        case 1:
+            return qsTr("Начать сборку")
+        case 2:
+            return qsTr("Заказ собран")
+        case 3:
+            return qsTr("Выдать заказ")
+        default:
+            return ""
+        }
+    }
+
+    function formatMoney(amount) {
+        if (amount === undefined || amount === null)
+            return ""
+        const numeric = Number(amount)
+        if (isNaN(numeric))
+            return amount
+        return numeric.toLocaleString(Qt.locale("ru_RU"), "f", numeric % 1 === 0 ? 0 : 2) + " ₽"
+    }
+
+    function formatDateTime(value) {
+        if (!value)
+            return "—"
+        return value.toString().replace("T", " ")
+    }
+
+    function updateSelectedOrder(order) {
+        if (order) {
+            const previousCode = selectedOrder ? selectedOrder.OrderCode : -1
+            selectedOrder = order
+            if (order.OrderCode !== previousCode) {
+                receipt = ({})
+            }
+            backend.requestReceipt(order.OrderCode)
+        } else {
+            selectedOrder = null
+            receipt = ({})
+        }
+    }
+
+    function updateListSelections() {
+        activeList.internalChange = true
+        activeList.currentIndex = activeCurrentIndex
+        activeList.internalChange = false
+
+        completedList.internalChange = true
+        completedList.currentIndex = completedCurrentIndex
+        completedList.internalChange = false
+    }
+
+    function selectFromList(section, index) {
+        if (section === "active") {
+            activeCurrentIndex = index
+            completedCurrentIndex = -1
+            updateSelectedOrder(index >= 0 && index < activeOrders.length ? activeOrders[index] : null)
+        } else {
+            completedCurrentIndex = index
+            activeCurrentIndex = -1
+            updateSelectedOrder(index >= 0 && index < completedOrders.length ? completedOrders[index] : null)
+        }
+        updateListSelections()
+    }
+
+    function ensureSelectionForTab(tabIndex) {
+        if (tabIndex === 0) {
+            if (activeOrders.length) {
+                const index = activeCurrentIndex >= 0 ? activeCurrentIndex : 0
+                activeCurrentIndex = index
+                completedCurrentIndex = -1
+                updateSelectedOrder(activeOrders[index])
+            } else {
+                activeCurrentIndex = -1
+                updateSelectedOrder(null)
+            }
+        } else {
+            if (completedOrders.length) {
+                const index = completedCurrentIndex >= 0 ? completedCurrentIndex : 0
+                completedCurrentIndex = index
+                activeCurrentIndex = -1
+                updateSelectedOrder(completedOrders[index])
+            } else {
+                completedCurrentIndex = -1
+                updateSelectedOrder(null)
+            }
+        }
+        updateListSelections()
+    }
 
     function statusText(statusCode) {
         switch (statusCode) {
@@ -164,11 +273,27 @@ Page {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 12
-            currentIndex: -1
-            highlight: Rectangle {
-                radius: 20
-                color: "#b9e4bf"
-                border.color: "#2e7d32"
+
+            TabBar {
+                id: tabs
+                Layout.fillWidth: true
+                currentIndex: 0
+
+                TabButton {
+                    text: qsTr("Активные")
+                }
+
+                TabButton {
+                    text: qsTr("Завершенные")
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                radius: 24
+                color: "#f1f8e9"
+                border.color: "#c8e6c9"
                 border.width: 1
             }
             highlightFollowsCurrentItem: true
