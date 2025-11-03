@@ -164,6 +164,22 @@ Page {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 12
+            currentIndex: -1
+            highlight: Rectangle {
+                radius: 20
+                color: "#b9e4bf"
+                border.color: "#2e7d32"
+                border.width: 1
+            }
+            highlightFollowsCurrentItem: true
+            onCurrentIndexChanged: {
+                if (currentIndex >= 0 && currentIndex < root.orders.length) {
+                    const order = root.orders[currentIndex]
+                    backend.requestReceipt(order.OrderCode)
+                } else {
+                    root.receipt = ({})
+                }
+            }
 
             TabBar {
                 id: tabs
@@ -356,6 +372,11 @@ Page {
                             color: "#78909c"
                         }
                     }
+                }
+
+                TapHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchScreen
+                    onTapped: orderList.currentIndex = index
                 }
             }
         }
